@@ -13,7 +13,7 @@ public class Game {
     private int mCurrentLevel = 2;
 
     private GameBoard mBoard = new GameBoard();
-    private ArrayList<String> mLevels = new ArrayList<String>();
+    private ArrayList<GameBoard> mLevels = new ArrayList<GameBoard>();
 
     private Player[] mPlayers = new Player[NUM_PLAYERS];
     private int mCurPlayer = -1;
@@ -35,8 +35,11 @@ public class Game {
                 if (line == null)
                     break;
                 if (line.contains("---")) {
-                    if (level.length() >= GameBoard.NUM_CELLS)
-                        mLevels.add(level);
+                    if (level.length() >= GameBoard.NUM_CELLS) {
+                        GameBoard board = new GameBoard();
+                        board.init(level);
+                        mLevels.add(board);
+                    }
                     level = "";
                 } else {
                     level += line;
@@ -45,16 +48,18 @@ public class Game {
         } catch (IOException iox) {
             mPlatform.popup("Failed to load levels file!", null);
         }
-
-        startGame();
     }
     
-    private void startGame() {
+    public void startGame() {
         mPlayers[0] = new HumanPlayer(GameBoard.CELL_WHITE);
         mPlayers[1] = new AIPlayer(GameBoard.CELL_BLACK);
-        mBoard.init(mLevels.get(mCurrentLevel));
+        mBoard = new GameBoard(mLevels.get(mCurrentLevel));
         mCurPlayer = -1;
         nextMove();
+    }
+
+    public void storeLevel(int levelIdx, GameBoard board) {
+        mLevels.set(levelIdx, new GameBoard(board));
     }
 
     void nextMove() {
@@ -77,6 +82,7 @@ public class Game {
                     //To change body of implemented methods use File | Settings | File Templates.
                     mCurrentLevel++;
                     startGame();
+                    mPlatform.repaint();
                 }});
             }
     }
@@ -98,4 +104,15 @@ public class Game {
         return mBoard;
     }
 
+    public int getCurrentLevel() {
+        return mCurrentLevel;
+    }
+
+    public void setCurrentLevel(int level) {
+        mCurrentLevel = level;
+    }
+
+    public int getNumLevels() {
+        return mLevels.size();
+    }
 }

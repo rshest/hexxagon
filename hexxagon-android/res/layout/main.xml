@@ -1,13 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="Hello World, HexxagonActivity"
-    />
-</LinearLayout>
+<FrameLayout
+        android:id="@+id/frame_layout"
+        android:layout_width="fill_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="fill_parent">
+    <RadioGroup
+            android:layout_height="wrap_content"
+            android:id="@+id/editor_hud"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            >
+        <RadioButton android:id="@+id/radio_none"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="N"
+                android:checked="true"
+                android:onClick="onRadioButtonClicked"/>
+        <RadioButton android:id="@+id/radio_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="E"
+                android:onClick="onRadioButtonClicked"/>
+        <RadioButton android:id="@+id/radio_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="X"
+                android:onClick="onRadioButtonClicked"/>
+        <RadioButton android:id="@+id/radio_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="O"
+                android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
+</FrameLayout>
 

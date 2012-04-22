@@ -10,26 +10,92 @@ import android.os.SystemClock;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.*;
+import android.widget.FrameLayout;
+import android.widget.RadioButton;
 
 public class HexxagonActivity extends Activity implements Platform
 {
     DrawThread mDrawThread;
-    MainView mView;
+    final MainView mView = new MainView(this, null);
 
     private boolean mIsShowGrid = false;
     private boolean mIsShowRows = false;
+    private boolean mEditorMode = false;
 
     private int[] mCornersX = new int[HexGridCell.NUM_CORNERS];
     private int[] mCornersY = new int[HexGridCell.NUM_CORNERS];
 
     private int mCellRadius = 16;
+    HexGridCell mMetrics = new HexGridCell(mCellRadius);
     private float mBallRatio = 0.7f;
+
+    Path mHexPath = new Path();
+    Paint mPaint = new Paint();
 
     private Game mGame = new Game(this);
 
     private int mBoardX = 0;
     private int mBoardY = 0;
+    private byte mCurEditorCellType = GameBoard.CELL_NONE;
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inf = getMenuInflater();
+        inf.inflate(R.layout.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.next_level:
+                synchronized (mView) {
+                    mGame.setCurrentLevel(Math.min(mGame.getNumLevels() - 1, mGame.getCurrentLevel() + 1));
+                    mGame.startGame();
+                    mView.focusBoardView(null);
+                }
+                break;
+            case R.id.prev_level:
+                synchronized (mView) {
+                    mGame.setCurrentLevel(Math.max(0, mGame.getCurrentLevel() - 1));
+                    mGame.startGame();
+                    mView.focusBoardView(null);
+                }
+                break;
+            case R.id.edit_level:
+                synchronized (mView) {
+                    mEditorMode = true;
+                    mIsShowGrid = true;
+                    findViewById(R.id.editor_hud).setVisibility(View.VISIBLE);
+                    mView.focusBoardView(new GameBoard.Extents());
+                }
+                break;
+            case R.id.play_level:
+                synchronized (mView) {
+                    mEditorMode = false;
+                    mIsShowGrid = false;
+                    findViewById(R.id.editor_hud).setVisibility(View.GONE);
+                    mGame.storeLevel(mGame.getCurrentLevel(), mGame.getBoard());
+                    mGame.startGame();
+                    mView.focusBoardView(null);
+                }
+                break;
+            case R.id.save_level:
+                //  TODO: Implement levels saving to SD card
+                break;
+        }
+        return true;
+    }
+
+    public void onRadioButtonClicked(View v) {
+        RadioButton rb = (RadioButton) v;
+        switch (rb.getId()) {
+            case R.id.radio_none: mCurEditorCellType = GameBoard.CELL_NONE; break;
+            case R.id.radio_empty: mCurEditorCellType = GameBoard.CELL_EMPTY; break;
+            case R.id.radio_black: mCurEditorCellType = GameBoard.CELL_BLACK; break;
+            case R.id.radio_white: mCurEditorCellType = GameBoard.CELL_WHITE; break;
+        }
+    }
 
     /** Called when the activity is first created. */
     @Override
@@ -43,12 +109,57 @@ public class HexxagonActivity extends Activity implements Platform
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mView = new MainView(this, null);
-        setContentView(mView);
+        setContentView(R.layout.main);
+
+        FrameLayout layout = (FrameLayout)findViewById(R.id.frame_layout);
+        layout.addView(mView, 0);
+
         mDrawThread = new DrawThread(mView.getHolder());
 
         mGame.init();
+        mGame.startGame();
+        mView.focusBoardView(null);
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Exit Hexxagon")
+                    .setMessage("Du you really want to exit the game?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            HexxagonActivity.this.finish();
+                        }
+
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+            return true;
+        }
+        else {
+            return super.onKeyDown(keyCode, event);
+        }
+
+    }
+//
+//    @Override
+//    public void onPause() {
+//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+//        SharedPreferences.Editor ed = pref.edit();
+//        ed.putInt("CurrentLevel", mGame.getCurrentLevel());
+//        ed.commit();
+//    }
+//
+//    @Override
+//    public void onResume() {
+//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+//        int curLevel = pref.getInt("CurrentLevel", 0);
+//        //mGame.init();
+//        //mGame.setCurrentLevel(curLevel);
+//    }
 
     @Override
     public void popup(String message, final Callback onClosedCallback) {
@@ -66,7 +177,9 @@ public class HexxagonActivity extends Activity implements Platform
         box.show();
     }
 
-    public void repaint(){}
+    public void repaint(){
+        mView.focusBoardView(null);
+    }
 
     void startDrawingThread() {
         mDrawThread.setRunning(true);
@@ -95,10 +208,10 @@ public class HexxagonActivity extends Activity implements Platform
             getHolder().addCallback(this);
         }
 
-        @Override
-        public void onDraw(Canvas canvas) {
-
-            GameBoard.Extents ext = mGame.getBoard().getBoardExtents();
+        public synchronized void focusBoardView(GameBoard.Extents ext) {
+            if (ext == null) {
+                ext = mGame.getBoard().getBoardExtents();
+            }
             int cellsW = ext.right - ext.left + 1;
             int cellsH = ext.bottom - ext.top + 1;
 
@@ -107,22 +220,29 @@ public class HexxagonActivity extends Activity implements Platform
             mBoardX = (int)((getWidth() - (cellsW + 0.25)*mCellRadius*3.0f/2.0f)/2.0f - ext.left*mCellRadius*3.0f/2.0f);
             mBoardY = (int)((getHeight() - (cellsH + 0.5)*mCellRadius*Math.sqrt(3.0f))/2.0f - ext.top*mCellRadius*Math.sqrt(3.0f));
 
-            HexGridCell metrics = new HexGridCell(mCellRadius);
+            mMetrics = new HexGridCell(mCellRadius);
+
+
+            mMetrics.setCellIndex(0, 0);
+            mMetrics.computeCorners(mCornersX, mCornersY);
+
+            mHexPath = new Path();
+            mHexPath.moveTo(mCornersX[0], mCornersY[0]);
+            for (int k = 1; k < HexGridCell.NUM_CORNERS; k++) {
+                mHexPath.lineTo(mCornersX[k], mCornersY[k]);
+            }
+            mHexPath.close();
+            mHexPath.offset(-mMetrics.getCenterX() + mBoardX, -mMetrics.getCenterY() + mBoardY);
+
+            mPaint = new Paint();
+            mPaint.setStyle(Paint.Style.FILL);
+        }
+
+        @Override
+        public synchronized void onDraw(Canvas canvas) {
+            if (mCellRadius == 0) mView.focusBoardView(null);
 
             canvas.drawColor(Color.DKGRAY);
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.FILL);
-
-            metrics.setCellIndex(0, 0);
-            metrics.computeCorners(mCornersX, mCornersY);
-
-            Path hexPath = new Path();
-            hexPath.moveTo(mCornersX[0], mCornersY[0]);
-            for (int k = 1; k < HexGridCell.NUM_CORNERS; k++) {
-                hexPath.lineTo(mCornersX[k], mCornersY[k]);
-            }
-            hexPath.close();
-            hexPath.offset(-metrics.getCenterX() + mBoardX, -metrics.getCenterY() + mBoardY);
 
             int cellColor = 0xFFAAAAAA;
             int selectedColor = 0xFF8888FF;
@@ -135,9 +255,9 @@ public class HexxagonActivity extends Activity implements Platform
                 for (int i = 0; i < GameBoard.WIDTH; i++) {
                     byte c = mGame.getBoard().cell(i, j);
 
-                    metrics.setCellIndex(i, j);
-                    metrics.computeCorners(mCornersX, mCornersY);
-                    hexPath.offset(metrics.getCenterX(), metrics.getCenterY());
+                    mMetrics.setCellIndex(i, j);
+                    mMetrics.computeCorners(mCornersX, mCornersY);
+                    mHexPath.offset(mMetrics.getCenterX(), mMetrics.getCenterY());
 
                     int dist = HexGridCell.walkDistance(i, j, selI, selJ);
                     int bgColor = 0;
@@ -152,32 +272,32 @@ public class HexxagonActivity extends Activity implements Platform
                     bgColor = (i == selI && j == selJ) ? selectedColor : bgColor;
 
                     if (bgColor != 0) {
-                        paint.setColor(bgColor);
-                        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                        canvas.drawPath(hexPath, paint);
+                        mPaint.setColor(bgColor);
+                        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                        canvas.drawPath(mHexPath, mPaint);
                     }
 
                     if (c != 0) {
                         if (c == GameBoard.CELL_BLACK || c == GameBoard.CELL_WHITE) {
                             float R = mCellRadius*mBallRatio;
-                            paint.setStyle(Paint.Style.FILL);
-                            paint.setColor(mGame.getBoard().cell(i, j) == GameBoard.CELL_BLACK ? Color.BLACK
+                            mPaint.setStyle(Paint.Style.FILL);
+                            mPaint.setColor(mGame.getBoard().cell(i, j) == GameBoard.CELL_BLACK ? Color.BLACK
                                     : Color.WHITE);
-                            canvas.drawCircle(metrics.getCenterX() + mBoardX, metrics.getCenterY() + mBoardY, R, paint);
-                            paint.setColor(Color.BLACK);
-                            paint.setStyle(Paint.Style.STROKE);
-                            canvas.drawCircle(metrics.getCenterX() + mBoardX, metrics.getCenterY() + mBoardY, R, paint);
+                            canvas.drawCircle(mMetrics.getCenterX() + mBoardX, mMetrics.getCenterY() + mBoardY, R, mPaint);
+                            mPaint.setColor(Color.BLACK);
+                            mPaint.setStyle(Paint.Style.STROKE);
+                            canvas.drawCircle(mMetrics.getCenterX() + mBoardX, mMetrics.getCenterY() + mBoardY, R, mPaint);
                         }
                     }
 
                     if (c != 0 || mIsShowGrid) {
-                        paint.setColor(Color.BLACK);
-                        paint.setStyle(Paint.Style.STROKE);
-                        canvas.drawPath(hexPath, paint);
-                        paint.setColor(Color.BLACK);
-                        canvas.drawPath(hexPath, paint);
+                        mPaint.setColor(Color.BLACK);
+                        mPaint.setStyle(Paint.Style.STROKE);
+                        canvas.drawPath(mHexPath, mPaint);
+                        mPaint.setColor(Color.BLACK);
+                        canvas.drawPath(mHexPath, mPaint);
                     }
-                    hexPath.offset(-metrics.getCenterX(), -metrics.getCenterY());
+                    mHexPath.offset(-mMetrics.getCenterX(), -mMetrics.getCenterY());
                 }
             }
         }
@@ -193,7 +313,11 @@ public class HexxagonActivity extends Activity implements Platform
 
                 if (clickI >= 0 && clickI < GameBoard.WIDTH && clickJ >= 0
                         && clickJ < GameBoard.HEIGHT) {
-                    mGame.getCurrentPlayer().onClickCell(clickCell, mGame);
+                    if (mEditorMode) {
+                        mGame.getBoard().setCell(clickCell, mCurEditorCellType);
+                    } else {
+                        mGame.getCurrentPlayer().onClickCell(clickCell, mGame);
+                    }
                 }
                 return false;
             }

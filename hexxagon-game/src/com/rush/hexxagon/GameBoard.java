@@ -45,15 +45,16 @@ public class GameBoard {
     }
 
     public static class Extents {
+        public Extents() { left = 0; top = 0; bottom = HEIGHT - 1; right = WIDTH - 1; }
+        public Extents(int _left, int _top, int _bottom, int _right) {
+            left = _left; top = _top; bottom = _bottom; right = _right;
+        }
+
         public int left, top, bottom, right;
     }
 
     public Extents getBoardExtents() {
-        Extents r = new Extents();
-        r.top = GameBoard.HEIGHT;
-        r.left = GameBoard.WIDTH;
-        r.bottom = 0;
-        r.right = 0;
+        Extents r = new Extents(GameBoard.WIDTH, GameBoard.HEIGHT, 0, 0);
         for (int j = 0; j < GameBoard.HEIGHT; j++) {
             for (int i = 0; i < GameBoard.WIDTH; i++) {
                 if (mCells[i + j*GameBoard.WIDTH] != CELL_NONE) {

@@ -9,6 +9,12 @@ public class AIPlayer extends Player {
         super(color);
     }
 
+    private class Solver implements Runnable {
+        public void run() {
+            //Code
+        }
+    }
+
     public void startMove(Game game) {
         GameBoard board = game.getBoard();
         ArrayList<Move> moves = board.getPossibleMoves(getColor());
