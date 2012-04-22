@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/hexxagon.iml" filepath="$PROJECT_DIR$/hexxagon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hexxagon-android/hexxagon-android.iml" filepath="$PROJECT_DIR$/hexxagon-android/hexxagon-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hexxagon-applet/hexxagon-applet.iml" filepath="$PROJECT_DIR$/hexxagon-applet/hexxagon-applet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hexxagon-game/hexxagon-game.iml" filepath="$PROJECT_DIR$/hexxagon-game/hexxagon-game.iml" />
+    </modules>
+  </component>
+</project>
+
