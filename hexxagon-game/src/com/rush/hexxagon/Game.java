@@ -1,8 +1,6 @@
 package com.rush.hexxagon;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -10,7 +8,7 @@ public class Game {
     private static final int NUM_PLAYERS = 2;
 
     private int mSelectedCell = -1;
-    private int mCurrentLevel = 2;
+    private int mCurrentLevel = 0;
 
     private GameBoard mBoard = new GameBoard();
     private ArrayList<GameBoard> mLevels = new ArrayList<GameBoard>();
@@ -24,11 +22,14 @@ public class Game {
         mPlatform = platform;
     }
     
-    public void init() {
+    public void loadLevelsData(InputStream stream) {
+        ArrayList<GameBoard> levels = new ArrayList<GameBoard>();
         try {
-            URL url = this.getClass().getResource("/resource/levels.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    url.openStream()));
+            if (stream == null) {
+                URL url = this.getClass().getResource("/resource/levels.txt");
+                stream = url.openStream();
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             String level = "";
             while (true) {
                 String line = reader.readLine();
@@ -38,7 +39,7 @@ public class Game {
                     if (level.length() >= GameBoard.NUM_CELLS) {
                         GameBoard board = new GameBoard();
                         board.init(level);
-                        mLevels.add(board);
+                        levels.add(board);
                     }
                     level = "";
                 } else {
@@ -48,6 +49,7 @@ public class Game {
         } catch (IOException iox) {
             mPlatform.popup("Failed to load levels file!", null);
         }
+        mLevels = levels;
     }
     
     public void startGame() {
@@ -114,5 +116,30 @@ public class Game {
 
     public int getNumLevels() {
         return mLevels.size();
+    }
+
+    public boolean saveLevelsData(OutputStream stream) {
+        final String sep = "----------------\n";
+        try {
+            stream.write(sep.getBytes());
+            for (GameBoard b: mLevels) {
+                for (int j = 0; j < GameBoard.HEIGHT; j++) {
+                    for (int i = 0; i < GameBoard.WIDTH; i++) {
+                        byte c = ' ';
+                        switch (b.cell(i, j)) {
+                            case GameBoard.CELL_EMPTY: c = '.'; break;
+                            case GameBoard.CELL_WHITE: c = 'O'; break;
+                            case GameBoard.CELL_BLACK: c = '*'; break;
+                        }
+                        stream.write(c);
+                    }
+                    stream.write('\n');
+                }
+                stream.write(sep.getBytes());
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 }

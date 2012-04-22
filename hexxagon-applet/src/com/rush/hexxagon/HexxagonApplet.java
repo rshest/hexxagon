@@ -32,7 +32,7 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
     @Override
     public void init() {
         addMouseListener(this);
-        mGame.init();
+        mGame.loadLevelsData(null);
         mGame.startGame();
     }
 

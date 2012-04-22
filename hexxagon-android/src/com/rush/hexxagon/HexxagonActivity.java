@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.graphics.*;
 import android.util.AttributeSet;
@@ -13,10 +14,12 @@ import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.RadioButton;
 
+import java.io.*;
+
 public class HexxagonActivity extends Activity implements Platform
 {
     DrawThread mDrawThread;
-    final MainView mView = new MainView(this, null);
+    MainView mView;
 
     private boolean mIsShowGrid = false;
     private boolean mIsShowRows = false;
@@ -80,8 +83,36 @@ public class HexxagonActivity extends Activity implements Platform
                     mView.focusBoardView(null);
                 }
                 break;
+            case R.id.load_level:
+                synchronized (mView) {
+                    loadLevelsFromSD();
+                }
+                break;
             case R.id.save_level:
-                //  TODO: Implement levels saving to SD card
+                //  Save levels file to SD card
+                boolean mExternalStorageAvailable = false;
+                boolean mExternalStorageWriteable = false;
+                String state = Environment.getExternalStorageState();
+                if (Environment.MEDIA_MOUNTED.equals(state)) {
+                    mExternalStorageAvailable = mExternalStorageWriteable = true;
+                } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+                    mExternalStorageAvailable = true;
+                    mExternalStorageWriteable = false;
+                }
+
+                if (!mExternalStorageAvailable) popup("No external storage available!", null);
+                else if (!mExternalStorageWriteable) popup("External storage is not writable!", null);
+                else {
+                    File file = new File(Environment.getExternalStorageDirectory(), "levels.txt");
+                    try {
+                        FileOutputStream os = new FileOutputStream(file, false);
+                        mGame.saveLevelsData(os);
+                        os.close();
+                    } catch (IOException e) {
+                        popup("Error writing " + file, null);
+                    }
+                }
+
                 break;
         }
         return true;
@@ -112,13 +143,28 @@ public class HexxagonActivity extends Activity implements Platform
         setContentView(R.layout.main);
 
         FrameLayout layout = (FrameLayout)findViewById(R.id.frame_layout);
+
+        mView = new MainView(this, null);
         layout.addView(mView, 0);
 
         mDrawThread = new DrawThread(mView.getHolder());
 
-        mGame.init();
+        mGame.loadLevelsData(null);
         mGame.startGame();
         mView.focusBoardView(null);
+    }
+
+    public void loadLevelsFromSD() {
+        File file = new File(Environment.getExternalStorageDirectory(), "levels.txt");
+        FileInputStream is;
+        try {
+            is = new FileInputStream(file);
+            mGame.loadLevelsData(is);
+            mGame.startGame();
+            mView.focusBoardView(null);
+        } catch (IOException e) {
+            popup("Error loading " + file, null);
+        }
     }
 
     @Override
@@ -127,7 +173,7 @@ public class HexxagonActivity extends Activity implements Platform
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Exit Hexxagon")
-                    .setMessage("Du you really want to exit the game?")
+                    .setMessage("Do you really want to exit the game?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -157,7 +203,7 @@ public class HexxagonActivity extends Activity implements Platform
 //    public void onResume() {
 //        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 //        int curLevel = pref.getInt("CurrentLevel", 0);
-//        //mGame.init();
+//        //mGame.loadLevelsData();
 //        //mGame.setCurrentLevel(curLevel);
 //    }
 
