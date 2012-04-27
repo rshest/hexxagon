@@ -70,6 +70,7 @@ public class HexxagonActivity extends Activity implements Platform
                 synchronized (mView) {
                     mEditorMode = true;
                     mIsShowGrid = true;
+                    mGame.selectCell(-1);
                     findViewById(R.id.editor_hud).setVisibility(View.VISIBLE);
                     mView.focusBoardView(new GameBoard.Extents());
                 }
@@ -390,8 +391,7 @@ public class HexxagonActivity extends Activity implements Platform
                 int clickJ = metrics.getIndexJ();
                 int clickCell = clickI + clickJ * GameBoard.WIDTH;
 
-                if (clickI >= 0 && clickI < GameBoard.WIDTH && clickJ >= 0
-                        && clickJ < GameBoard.HEIGHT) {
+                if (mGame.getBoard().inBoard(clickI, clickJ)) {
                     if (mEditorMode) {
                         mGame.getBoard().setCell(clickCell, mCurEditorCellType);
                     } else {

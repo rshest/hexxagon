@@ -96,8 +96,7 @@ public class GameBoard {
     public boolean move(int from, int to) {
         int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
                 / GameBoard.WIDTH, to % GameBoard.WIDTH, to / GameBoard.WIDTH);
-        if (from > 0 && to > 0 && mCells[to] == GameBoard.CELL_EMPTY
-                && dist <= 2) {
+        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2) {
             byte myCell = mCells[from];
             setCell(to, myCell);
             if (dist == 2) {
@@ -118,10 +117,14 @@ public class GameBoard {
         for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
             int nI = HexGridCell.getNeighborI(cI, cJ, i);
             int nJ = HexGridCell.getNeighborJ(cI, cJ, i);
-            if (cell(nI, nJ) == foeCell) {
+            if (inBoard(nI, nJ) && cell(nI, nJ) == foeCell) {
                 setCell(nI + nJ * WIDTH, myCell);
             }
         }
+    }
+
+    public boolean inBoard(int nI, int nJ) {
+        return nI >= 0 && nJ >= 0 && nI < WIDTH && nJ < HEIGHT;
     }
 
     public ArrayList<Move> getPossibleMoves(byte player) {
@@ -135,8 +138,7 @@ public class GameBoard {
                     for (int k = 0; k < HexGridCell.NUM_NEIGHBORS; k++) {
                         int ni = HexGridCell.getNeighborI(i, j, k);
                         int nj = HexGridCell.getNeighborJ(i, j, k);
-                        if (ni >= 0 && nj >= 0 && ni < GameBoard.WIDTH
-                                && nj < GameBoard.HEIGHT) {
+                        if (inBoard(ni, nj)) {
                             int n = ni + nj * GameBoard.WIDTH;
                             if (mCells[n] == player) {
                                 moves.add(new Move(n, cellIdx));
@@ -147,8 +149,7 @@ public class GameBoard {
                     for (int k = 0; k < HexGridCell.NUM_NEIGHBORS2; k++) {
                         int ni = HexGridCell.getNeighbor2I(i, j, k);
                         int nj = HexGridCell.getNeighbor2J(i, j, k);
-                        if (ni >= 0 && nj >= 0 && ni < GameBoard.WIDTH
-                                && nj < GameBoard.HEIGHT) {
+                        if (inBoard(ni, nj)) {
                             int n = ni + nj * GameBoard.WIDTH;
                             if (mCells[n] == player) {
                                 moves.add(new Move(n, cellIdx));
