@@ -13,6 +13,7 @@ import android.util.AttributeSet;
 import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 import java.io.*;
 
@@ -89,33 +90,56 @@ public class HexxagonActivity extends Activity implements Platform
                 }
                 break;
             case R.id.save_level:
-                //  Save levels file to SD card
-                boolean mExternalStorageAvailable = false;
-                boolean mExternalStorageWriteable = false;
-                String state = Environment.getExternalStorageState();
-                if (Environment.MEDIA_MOUNTED.equals(state)) {
-                    mExternalStorageAvailable = mExternalStorageWriteable = true;
-                } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-                    mExternalStorageAvailable = true;
-                    mExternalStorageWriteable = false;
-                }
-
-                if (!mExternalStorageAvailable) popup("No external storage available!", null);
-                else if (!mExternalStorageWriteable) popup("External storage is not writable!", null);
-                else {
-                    File file = new File(Environment.getExternalStorageDirectory(), "levels.txt");
-                    try {
-                        FileOutputStream os = new FileOutputStream(file, false);
-                        mGame.saveLevelsData(os);
-                        os.close();
-                    } catch (IOException e) {
-                        popup("Error writing " + file, null);
-                    }
-                }
-
+                saveLevelsToSD();
                 break;
         }
         return true;
+    }
+
+    private void saveLevelsToSD() {
+        boolean mExternalStorageAvailable = false;
+        boolean mExternalStorageWriteable = false;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mExternalStorageAvailable = mExternalStorageWriteable = true;
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            mExternalStorageAvailable = true;
+            mExternalStorageWriteable = false;
+        }
+
+        if (!mExternalStorageAvailable) popup("No external storage available!", null);
+        else if (!mExternalStorageWriteable) popup("External storage is not writable!", null);
+        else {
+            final File file = new File(Environment.getExternalStorageDirectory(), "levels.txt");
+            if (file.exists()) {
+                new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Save levels data")
+                    .setMessage("Do you want to overwrite the existing data file?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                FileOutputStream os = new FileOutputStream(file, false);
+                                mGame.saveLevelsData(os);
+                                os.close();
+                            } catch (IOException e) {
+                                popup("Error writing " + file, null);
+                            }
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+            } else {
+                try {
+                    FileOutputStream os = new FileOutputStream(file, false);
+                    mGame.saveLevelsData(os);
+                    os.close();
+                } catch (IOException e) {
+                    popup("Error writing " + file, null);
+                }
+            }
+        }
     }
 
     public void onRadioButtonClicked(View v) {
@@ -225,6 +249,12 @@ public class HexxagonActivity extends Activity implements Platform
 
     public void repaint(){
         mView.focusBoardView(null);
+        // update the counters display
+        String strNumBlack = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_BLACK));
+        String strNumWhite = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_WHITE));
+
+        ((TextView)findViewById(R.id.white_count_text)).setText(strNumWhite);
+        ((TextView)findViewById(R.id.black_count_text)).setText(strNumBlack);
     }
 
     void startDrawingThread() {
@@ -246,8 +276,8 @@ public class HexxagonActivity extends Activity implements Platform
     }
 
     public void update(float dt) {
-
     }
+
     class MainView extends SurfaceView implements SurfaceHolder.Callback {
         public MainView(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -261,13 +291,15 @@ public class HexxagonActivity extends Activity implements Platform
             int cellsW = ext.right - ext.left + 1;
             int cellsH = ext.bottom - ext.top + 1;
 
-            mCellRadius = (int) Math.min((getWidth()/(cellsW + 0.25))*2.0f/3.0f, (getHeight()/(cellsH + 0.5))/Math.sqrt(3.0f));
+            int viewW = mView.getWidth();
+            int viewH = mView.getHeight();
 
-            mBoardX = (int)((getWidth() - (cellsW + 0.25)*mCellRadius*3.0f/2.0f)/2.0f - ext.left*mCellRadius*3.0f/2.0f);
-            mBoardY = (int)((getHeight() - (cellsH + 0.5)*mCellRadius*Math.sqrt(3.0f))/2.0f - ext.top*mCellRadius*Math.sqrt(3.0f));
+            mCellRadius = (int) Math.min((viewW/(cellsW + 0.25))*2.0f/3.0f, (viewH/(cellsH + 0.5))/Math.sqrt(3.0f));
+
+            mBoardX = (int)((viewW - (cellsW + 0.25)*mCellRadius*3.0f/2.0f)/2.0f - ext.left*mCellRadius*3.0f/2.0f);
+            mBoardY = (int)((viewH - (cellsH + 0.5)*mCellRadius*Math.sqrt(3.0f))/2.0f - ext.top*mCellRadius*Math.sqrt(3.0f));
 
             mMetrics = new HexGridCell(mCellRadius);
-
 
             mMetrics.setCellIndex(0, 0);
             mMetrics.computeCorners(mCornersX, mCornersY);
@@ -286,6 +318,7 @@ public class HexxagonActivity extends Activity implements Platform
 
         @Override
         public synchronized void onDraw(Canvas canvas) {
+            //  update the board
             if (mCellRadius == 0) mView.focusBoardView(null);
 
             canvas.drawColor(Color.DKGRAY);

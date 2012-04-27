@@ -34,5 +34,62 @@
                 android:text="O"
                 android:onClick="onRadioButtonClicked"/>
     </RadioGroup>
+    <RelativeLayout
+            android:id="@+id/play_hud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+             >
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_alignParentTop="true"
+                >
+            <Button
+                    android:id="@+id/zoom_in_button"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:text="+"
+                    android:textSize="25dip"
+                    android:padding="3dip"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            <Button
+                    android:id="@+id/zoom_out_button"
+                    android:text="-"
+                    android:textSize="25dip"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:padding="3dip"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_alignParentBottom="true"
+                >
+            <TextView
+                    android:id="@+id/white_count_text"
+                    android:textColor="#ffffff"
+                    android:textStyle="bold"
+                    android:text="0"
+                    android:textSize="25dip"
+                    android:padding="3dip"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            <TextView
+                    android:id="@+id/black_count_text"
+                    android:text="0"
+                    android:textSize="25dip"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:padding="3dip"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+        </LinearLayout>
+    </RelativeLayout>
 </FrameLayout>
 
