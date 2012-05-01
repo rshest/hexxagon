@@ -53,9 +53,9 @@ public class Game {
     }
     
     public void startGame() {
-        //mPlayers[0] = new HumanPlayer(GameBoard.CELL_WHITE);
-        mPlayers[0] = new AIPlayer(GameBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 4);
-        mPlayers[1] = new AIPlayer(GameBoard.CELL_BLACK, AIPlayer.SolverType.AlphaBetaSort, 4);
+        mPlayers[0] = new HumanPlayer(GameBoard.CELL_WHITE);
+        //mPlayers[0] = new AIPlayer(GameBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 3);
+        mPlayers[1] = new AIPlayer(GameBoard.CELL_BLACK, AIPlayer.SolverType.AlphaBetaSort, 3);
         mBoard = new GameBoard(mLevels.get(mCurrentLevel));
         mCurPlayer = -1;
         nextMove();

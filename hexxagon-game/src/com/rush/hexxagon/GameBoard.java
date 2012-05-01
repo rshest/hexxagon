@@ -13,6 +13,10 @@ public class GameBoard {
     public static final byte CELL_BLACK = 2;
     public static final byte CELL_WHITE = 3;
 
+    public static byte getFoeColor(byte color) {
+        return (color == GameBoard.CELL_BLACK) ? GameBoard.CELL_WHITE : GameBoard.CELL_BLACK;
+    }
+
     // game board cells array
     private byte[] mCells;
 
@@ -114,18 +118,38 @@ public class GameBoard {
         return -1;
     }
 
+    public int getMoveAdded(short from, short to) {
+        int toI = to % WIDTH;
+        int toJ = to / WIDTH;
+        int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
+                / GameBoard.WIDTH, toI, toJ);
+        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY &&
+                dist <= 2 && dist > 0) {
+            int numAdded = 2 - dist; // 0 if dist==2, 1 if dist==1
+            byte foeCell = getFoeColor(mCells[from]);
+            for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
+                int nI = HexGridCell.getNeighborI(toI, toJ, i);
+                int nJ = HexGridCell.getNeighborJ(toI, toJ, i);
+                if (inBoard(nI, nJ) && cell(nI, nJ) == foeCell) {
+                    numAdded++;
+                }
+            }
+            return numAdded;
+        }
+        return 0;
+    }
+
     public int captureNeighbors(int to) {
         int cI = to % WIDTH;
         int cJ = to / WIDTH;
-        byte myCell = mCells[to];
+        byte color = mCells[to];
         int numCaptured = 0;
-        byte foeCell = (myCell == GameBoard.CELL_BLACK) ? GameBoard.CELL_WHITE
-                : GameBoard.CELL_BLACK;
+        byte foeColor = GameBoard.getFoeColor(color);
         for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
             int nI = HexGridCell.getNeighborI(cI, cJ, i);
             int nJ = HexGridCell.getNeighborJ(cI, cJ, i);
-            if (inBoard(nI, nJ) && cell(nI, nJ) == foeCell) {
-                setCell(nI + nJ * WIDTH, myCell);
+            if (inBoard(nI, nJ) && cell(nI, nJ) == foeColor) {
+                setCell(nI + nJ * WIDTH, color);
                 numCaptured++;
             }
         }
@@ -138,9 +162,9 @@ public class GameBoard {
 
     public ArrayList<Move> getPossibleMoves(byte player) {
         ArrayList<Move> moves = new ArrayList<Move>();
-        for (int j = 0; j < GameBoard.HEIGHT; j++) {
-            for (int i = 0; i < GameBoard.WIDTH; i++) {
-                int cellIdx = i + j * GameBoard.WIDTH;
+        for (byte j = 0; j < GameBoard.HEIGHT; j++) {
+            for (byte i = 0; i < GameBoard.WIDTH; i++) {
+                short cellIdx = (short)(i + j * GameBoard.WIDTH);
                 if (mCells[cellIdx] == GameBoard.CELL_EMPTY) {
                     // the cell can be moved to
                     // check the near neighbors (a single one of the is enough)
@@ -148,7 +172,7 @@ public class GameBoard {
                         int ni = HexGridCell.getNeighborI(i, j, k);
                         int nj = HexGridCell.getNeighborJ(i, j, k);
                         if (inBoard(ni, nj)) {
-                            int n = ni + nj * GameBoard.WIDTH;
+                            short n = (short)(ni + nj * GameBoard.WIDTH);
                             if (mCells[n] == player) {
                                 moves.add(new Move(n, cellIdx));
                                 break;
@@ -159,7 +183,7 @@ public class GameBoard {
                         int ni = HexGridCell.getNeighbor2I(i, j, k);
                         int nj = HexGridCell.getNeighbor2J(i, j, k);
                         if (inBoard(ni, nj)) {
-                            int n = ni + nj * GameBoard.WIDTH;
+                            short n = (short)(ni + nj * GameBoard.WIDTH);
                             if (mCells[n] == player) {
                                 moves.add(new Move(n, cellIdx));
                             }
@@ -193,7 +217,6 @@ public class GameBoard {
 
     // evaluates the board value for the given player
     public int getValue(byte color) {
-        byte foeColor = (color == CELL_BLACK) ? CELL_WHITE : CELL_BLACK;
-        return getNumCells(color) - getNumCells(foeColor);
+        return getNumCells(color) - getNumCells(getFoeColor(color));
     }
 }
