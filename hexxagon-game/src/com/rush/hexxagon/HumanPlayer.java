@@ -13,8 +13,8 @@ public class HumanPlayer extends Player {
             // unselect the cell
             game.selectCell(-1);
         } else if (board.isCellFree(cellIdx)) {
-            boolean moved = board.move(game.getSelectedCell(), cellIdx);
-            if (moved) {
+            int numAdded = board.move(game.getSelectedCell(), cellIdx);
+            if (numAdded >= 0) {
                 game.nextMove();
                 game.selectCell(-1);
             }

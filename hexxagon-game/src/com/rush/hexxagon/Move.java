@@ -8,4 +8,5 @@ public class Move {
 
     public int from;
     public int to;
+    public int value = 0;
 }

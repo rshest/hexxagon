@@ -44,6 +44,10 @@ public class GameBoard {
         }
     }
 
+    public void copy(GameBoard b) {
+        System.arraycopy(b.mCells, 0, mCells, 0, NUM_CELLS);
+    }
+
     public static class Extents {
         public Extents() { left = 0; top = 0; bottom = HEIGHT - 1; right = WIDTH - 1; }
         public Extents(int _left, int _top, int _bottom, int _right) {
@@ -93,25 +97,28 @@ public class GameBoard {
         return res;
     }
 
-    public boolean move(int from, int to) {
+    public int move(int from, int to) {
         int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
                 / GameBoard.WIDTH, to % GameBoard.WIDTH, to / GameBoard.WIDTH);
         if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2) {
+            int numAdded = 1;
             byte myCell = mCells[from];
             setCell(to, myCell);
             if (dist == 2) {
                 setCell(from, GameBoard.CELL_EMPTY);
+                numAdded = 0;
             }
-            captureNeighbors(to);
-            return true;
+            numAdded += captureNeighbors(to);
+            return numAdded;
         }
-        return false;
+        return -1;
     }
 
-    public void captureNeighbors(int to) {
+    public int captureNeighbors(int to) {
         int cI = to % WIDTH;
         int cJ = to / WIDTH;
         byte myCell = mCells[to];
+        int numCaptured = 0;
         byte foeCell = (myCell == GameBoard.CELL_BLACK) ? GameBoard.CELL_WHITE
                 : GameBoard.CELL_BLACK;
         for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
@@ -119,8 +126,10 @@ public class GameBoard {
             int nJ = HexGridCell.getNeighborJ(cI, cJ, i);
             if (inBoard(nI, nJ) && cell(nI, nJ) == foeCell) {
                 setCell(nI + nJ * WIDTH, myCell);
+                numCaptured++;
             }
         }
+        return numCaptured;
     }
 
     public boolean inBoard(int nI, int nJ) {

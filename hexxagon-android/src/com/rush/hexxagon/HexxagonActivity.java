@@ -1,26 +1,34 @@
 package com.rush.hexxagon;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
 
 import android.app.Activity;
-import android.os.Bundle;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.SystemClock;
-import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class HexxagonActivity extends Activity implements Platform
 {
     DrawThread mDrawThread;
     MainView mView;
+    private Handler mHandler = new Handler();
 
     private boolean mIsShowGrid = false;
     private boolean mIsShowRows = false;
@@ -249,18 +257,24 @@ public class HexxagonActivity extends Activity implements Platform
     }
 
     public void repaint(){
-        mView.focusBoardView(null);
-        // update the counters display
-        String strNumBlack = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_BLACK));
-        String strNumWhite = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_WHITE));
+        mHandler.post(new Runnable() {
+            public void run() {
+                mView.focusBoardView(null);
+                // update the counters display
+                String strNumBlack = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_BLACK));
+                String strNumWhite = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_WHITE));
 
-        ((TextView)findViewById(R.id.white_count_text)).setText(strNumWhite);
-        ((TextView)findViewById(R.id.black_count_text)).setText(strNumBlack);
+                ((TextView)findViewById(R.id.white_count_text)).setText(strNumWhite);
+                ((TextView)findViewById(R.id.black_count_text)).setText(strNumBlack);
+            }
+        });
     }
 
     void startDrawingThread() {
-        mDrawThread.setRunning(true);
-        mDrawThread.start();
+        if (!mDrawThread.isRunning()) {
+            mDrawThread.setRunning(true);
+            mDrawThread.start();
+        }
     }
 
     void stopDrawingThread() {
@@ -452,6 +466,10 @@ public class HexxagonActivity extends Activity implements Platform
                     }
                 }
             }
+        }
+
+        public boolean isRunning() {
+            return mIsRunning;
         }
     }
 }

@@ -43,7 +43,7 @@ public class Game {
                     }
                     level = "";
                 } else {
-                    level += line;
+                    level += String.format("%1$-" + GameBoard.WIDTH + "s", line); // pad with spaces
                 }
             }
         } catch (IOException iox) {
@@ -53,8 +53,9 @@ public class Game {
     }
     
     public void startGame() {
-        mPlayers[0] = new HumanPlayer(GameBoard.CELL_WHITE);
-        mPlayers[1] = new AIPlayer(GameBoard.CELL_BLACK);
+        //mPlayers[0] = new HumanPlayer(GameBoard.CELL_WHITE);
+        mPlayers[0] = new AIPlayer(GameBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 4);
+        mPlayers[1] = new AIPlayer(GameBoard.CELL_BLACK, AIPlayer.SolverType.AlphaBetaSort, 4);
         mBoard = new GameBoard(mLevels.get(mCurrentLevel));
         mCurPlayer = -1;
         nextMove();
@@ -65,6 +66,7 @@ public class Game {
     }
 
     void nextMove() {
+        mPlatform.repaint();
         mCurPlayer = (mCurPlayer + 1) % mPlayers.length;
         byte winner = mBoard.getWinner(getCurrentPlayer().getColor());
         if (winner == GameBoard.CELL_EMPTY) {
@@ -77,16 +79,15 @@ public class Game {
             }
             mPlatform.repaint();
 
-            String message = winner == GameBoard.CELL_BLACK ? "Black won!" : "White won!";
+            String message = (winner == GameBoard.CELL_BLACK) ? "Black won!" : "White won!";
             mPlatform.popup(message, new Platform.Callback(){
                 @Override
                 public void call() {
-                    //To change body of implemented methods use File | Settings | File Templates.
                     mCurrentLevel++;
                     startGame();
                     mPlatform.repaint();
                 }});
-            }
+        }
     }
 
     public Player getCurrentPlayer() {
