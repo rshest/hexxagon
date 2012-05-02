@@ -1,13 +1,11 @@
 package com.rush.hexxagon;
 
+import javax.swing.*;
 import java.applet.Applet;
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Applet for an "hexxagon" game implementation
@@ -21,6 +19,7 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
     
     private boolean mIsShowGrid = false;
     private boolean mIsShowRows = false;
+    private boolean mIsShowIdx = true;
     
     private int[] mCornersX = new int[HexGridCell.NUM_CORNERS];
     private int[] mCornersY = new int[HexGridCell.NUM_CORNERS];
@@ -93,6 +92,18 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
                 if (c != 0 || mIsShowGrid) {
                     g.setColor(Color.BLACK);
                     g.drawPolygon(mCornersX, mCornersY, HexGridCell.NUM_CORNERS);
+                }
+
+                if (mIsShowIdx) {
+                    g.setColor(Color.BLUE);
+                    Font font = new Font("Serif", Font.PLAIN, 9);
+                    String str = "" + (i + j*GameBoard.WIDTH);
+                    FontMetrics fm = getFontMetrics(font);
+                    Rectangle2D rect = fm.getStringBounds(str, g);
+                    int w = (int)rect.getWidth();
+                    int h = (int)rect.getHeight();
+                    g.setFont(font);
+                    g.drawString(str,mCellMetrics.getCenterX() - w/2, mCellMetrics.getCenterY() + h/2);
                 }
             }
         }

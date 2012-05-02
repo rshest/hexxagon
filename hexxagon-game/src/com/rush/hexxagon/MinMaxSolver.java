@@ -10,14 +10,13 @@ public class MinMaxSolver extends BaseSolver {
         mMaxDepth = maxDepth;
     }
 
-    @Override
-    protected void evaluateMoves(GameBoard board, byte color, ArrayList<Move> moves) {
+    public void evaluateMoves(GameBoard board, byte color, ArrayList<Move> moves) {
 //        GameBoard b = new GameBoard();
 //        int baseValue = board.getValue(color);
 //        byte foeColor = (color == GameBoard.CELL_BLACK) ? GameBoard.CELL_WHITE : GameBoard.CELL_BLACK;
 //
 //        Random rnd = new Random();
-//        int bestValue = Integer.MIN_VALUE;
+//        int bestValue = -GameBoard.BIG_VALUE;
 //        int nMax = 0;
 //        Move bestMove = null;
 //        for (Move move : moves) {
@@ -29,7 +28,7 @@ public class MinMaxSolver extends BaseSolver {
 //                value = numAdded + baseValue;
 //            } else {
 //                Move m = getBestMove(b, foeColor, depth - 1);
-//                value = (m != null) ? -m.value : Integer.MAX_VALUE;
+//                value = (m != null) ? -m.value : GameBoard.BIG_VALUE;
 //            }
 //            if (value > bestValue) {
 //                bestValue = value;
@@ -60,7 +59,7 @@ public class MinMaxSolver extends BaseSolver {
         byte foeColor = GameBoard.getFoeColor(color);
 
         Random rnd = new Random();
-        int bestValue = Integer.MIN_VALUE;
+        int bestValue = -GameBoard.BIG_VALUE;
         int nMax = 0;
         Move bestMove = null;
         for (Move move : moves) {
@@ -72,7 +71,7 @@ public class MinMaxSolver extends BaseSolver {
                 value = numAdded + baseValue;
             } else {
                 Move m = getBestMove(b, foeColor, depth - 1);
-                value = (m != null) ? -m.value : Integer.MAX_VALUE;
+                value = (m != null) ? -m.value : GameBoard.BIG_VALUE;
             }
             if (value > bestValue) {
                 bestValue = value;

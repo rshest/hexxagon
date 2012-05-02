@@ -20,14 +20,14 @@ public class AlphaBetaSolver extends BaseSolver {
             int nOwn = board.getNumCells(color);
             int nFoe = board.getNumCells(foeColor);
             int nEmpty = board.getNumCells(GameBoard.CELL_EMPTY);
-            return (nFoe + nEmpty >= nOwn) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            return (nFoe + nEmpty >= nOwn) ? -GameBoard.BIG_VALUE : GameBoard.BIG_VALUE;
         }
 
         if (depth == 0) {
             //  leaf node, evaluate by counting the balls difference
             super.evaluateMoves(board, color, moves);
             mTotalMovesSearched += moves.size();
-            Move m = super.getBestMove(moves, false);
+            Move m = getBestMove(moves, false);
             return m.value;
         }
 
@@ -36,6 +36,7 @@ public class AlphaBetaSolver extends BaseSolver {
             sortMoves(moves);
         }
 
+        alpha = -GameBoard.BIG_VALUE;
         GameBoard b = new GameBoard();
         for (Move move : moves) {
             mTotalMovesSearched++;
@@ -45,7 +46,7 @@ public class AlphaBetaSolver extends BaseSolver {
             move.value = -evaluateMoves(b, m, foeColor, -beta, -alpha, depth - 1);
             alpha = Math.max(alpha, move.value);
             if (alpha >= beta) {
-                return alpha;
+                //return alpha;
             }
         }
         return alpha;
@@ -54,7 +55,7 @@ public class AlphaBetaSolver extends BaseSolver {
     @Override
     public Move getBestMove(GameBoard board, byte color) {
         ArrayList<Move> moves = board.getPossibleMoves(color);
-        evaluateMoves(board, moves, color, Integer.MIN_VALUE, Integer.MAX_VALUE, mMaxDepth);
+        evaluateMoves(board, moves, color, -GameBoard.BIG_VALUE, GameBoard.BIG_VALUE, mMaxDepth);
         return getBestMove(moves, false);
     }
 }

@@ -33,10 +33,18 @@ public class GameBoardTest {
             GameBoard newBoard = new GameBoard(board);
             byte color = board.cell(move.from);
             int numAdded = board.getMoveAdded(move.from, move.to);
+
             int numAdded1 = newBoard.move(move.from, move.to);
-            int cellDiff = newBoard.getNumCells(color) - board.getNumCells(color);
             Assert.assertEquals(numAdded, numAdded1);
-            Assert.assertEquals(numAdded, cellDiff);
+
+            int cellsAdded = newBoard.getNumCells(color) - board.getNumCells(color);
+            Assert.assertEquals(numAdded, cellsAdded);
+
+            int moveDiff = board.getMoveDiff(move.from, move.to);
+            int oldDiff = board.getNumCells(color) - board.getNumCells(GameBoard.getFoeColor(color));
+            int newDiff = newBoard.getNumCells(color) - newBoard.getNumCells(GameBoard.getFoeColor(color));
+            int cellsDiff = newDiff - oldDiff;
+            Assert.assertEquals(cellsDiff, moveDiff);
         }
     }
 }

@@ -8,5 +8,5 @@ public class Move {
 
     public short from;
     public short to;
-    public int value = Integer.MIN_VALUE;
+    public int value = -GameBoard.BIG_VALUE;
 }

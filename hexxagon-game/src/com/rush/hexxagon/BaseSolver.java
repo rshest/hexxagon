@@ -7,20 +7,20 @@ import java.util.Random;
 
 public class BaseSolver {
     protected int mTotalMovesSearched = 0;
-    private Random mRandom = new Random();
+    private static Random mRandom = new Random();
 
     public int getTotalMovesSearched() {
         return mTotalMovesSearched;
     }
 
-    protected void evaluateMoves(GameBoard board, byte color, ArrayList<Move> moves) {
+    public void evaluateMoves(GameBoard board, byte color, ArrayList<Move> moves) {
         int baseValue = board.getValue(color);
         for (Move move : moves) {
-            move.value = baseValue + board.getMoveAdded(move.from, move.to);
+            move.value = baseValue + board.getMoveDiff(move.from, move.to);
         }
     }
 
-    protected void sortMoves(ArrayList<Move> moves) {
+    public static void sortMoves(ArrayList<Move> moves) {
         Collections.sort(moves, new Comparator<Move>() {
             @Override
             public int compare(Move o1, Move o2) {
@@ -29,7 +29,7 @@ public class BaseSolver {
         });
     }
 
-    Move getBestMove(ArrayList<Move> moves, boolean isOrdered) {
+    public static Move getBestMove(ArrayList<Move> moves, boolean isOrdered) {
         Move bestMove = null;
         if (isOrdered && moves.size() > 0) {
             int bestValue = moves.get(0).value;
@@ -44,7 +44,7 @@ public class BaseSolver {
         else {
             // if the moves are not ordered, then perform "reservoir sampling"
             // to choose the random move from the best ones
-            int bestValue = Integer.MIN_VALUE;
+            int bestValue = -GameBoard.BIG_VALUE;
             int nMax = 0;
             for (Move move : moves) {
                 if (move.value > bestValue) {

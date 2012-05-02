@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class GameBoard {
 
+    public static final int BIG_VALUE = 1000000;
     public static final int WIDTH = 16;
     public static final int HEIGHT = 12;
     public static final int NUM_CELLS = WIDTH * HEIGHT;
@@ -118,23 +119,37 @@ public class GameBoard {
         return -1;
     }
 
+    public int getNumToCapture(int cellI, int cellJ, byte color) {
+        int res = 0;
+        for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
+            int nI = HexGridCell.getNeighborI(cellI, cellJ, i);
+            int nJ = HexGridCell.getNeighborJ(cellI, cellJ, i);
+            if (inBoard(nI, nJ) && cell(nI, nJ) == color) {
+                res++;
+            }
+        }
+        return res;
+    }
+
     public int getMoveAdded(short from, short to) {
         int toI = to % WIDTH;
         int toJ = to / WIDTH;
         int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
                 / GameBoard.WIDTH, toI, toJ);
-        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY &&
-                dist <= 2 && dist > 0) {
-            int numAdded = 2 - dist; // 0 if dist==2, 1 if dist==1
-            byte foeCell = getFoeColor(mCells[from]);
-            for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
-                int nI = HexGridCell.getNeighborI(toI, toJ, i);
-                int nJ = HexGridCell.getNeighborJ(toI, toJ, i);
-                if (inBoard(nI, nJ) && cell(nI, nJ) == foeCell) {
-                    numAdded++;
-                }
-            }
-            return numAdded;
+        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2 && dist > 0) {
+            return 2 - dist + getNumToCapture(toI, toJ, getFoeColor(mCells[from]));
+        }
+        return 0;
+    }
+
+    public int getMoveDiff(short from, short to) {
+        int toI = to % WIDTH;
+        int toJ = to / WIDTH;
+        int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
+                / GameBoard.WIDTH, toI, toJ);
+        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2 && dist > 0) {
+            //  each captured cell counts for a difference of 2
+            return 2 - dist + 2*(getNumToCapture(toI, toJ, getFoeColor(mCells[from])));
         }
         return 0;
     }
@@ -217,6 +232,8 @@ public class GameBoard {
 
     // evaluates the board value for the given player
     public int getValue(byte color) {
-        return getNumCells(color) - getNumCells(getFoeColor(color));
+        int myCells = getNumCells(color);
+        int foeCells = getNumCells(getFoeColor(color));
+        return myCells > 0 ? myCells - foeCells : -GameBoard.BIG_VALUE;
     }
 }
