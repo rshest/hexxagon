@@ -13,20 +13,22 @@ import java.awt.geom.Rectangle2D;
  * @author Ruslan Shestopalyuk
  */
 public class HexxagonApplet extends Applet implements MouseListener, Platform {
-    private static final long serialVersionUID = 1L;
+    static final float BALL_RATIO = 0.8f;
+    static final int CELL_RADIUS = 22;
 
-    private static final int CELL_RADIUS = 22;
-    
-    private boolean mIsShowGrid = false;
-    private boolean mIsShowRows = false;
-    private boolean mIsShowIdx = true;
-    
-    private int[] mCornersX = new int[HexGridCell.NUM_CORNERS];
-    private int[] mCornersY = new int[HexGridCell.NUM_CORNERS];
+    static final Color mCellColor = new Color(0xAAAAAA);
+    static final Color mSelectedColor = new Color(0x8888FF);
+    static final Color mSelectedColor1 = new Color(0x3333AA);
+    static final Color mSelectedColor2 = new Color(0x6666CC);
 
-    private static HexGridCell mCellMetrics = new HexGridCell(CELL_RADIUS);
+    int[] mCornersX = new int[HexGridCell.NUM_CORNERS];
+    int[] mCornersY = new int[HexGridCell.NUM_CORNERS];
 
-    private Game mGame = new Game(this);
+    boolean mIsShowGrid = false;
+    boolean mIsShowRows = false;
+    boolean mIsShowIdx = false;
+
+    Game mGame = new Game(this);
 
     @Override
     public void init() {
@@ -40,34 +42,31 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
         paint(g);
     }
 
-    @Override
-    public void paint(Graphics g) {
-        setBackground(Color.DARK_GRAY);
-        Color cellColor = new Color(0xAAAAAA);
-        Color selectedColor = new Color(0x8888FF);
-        Color dist1Color = new Color(0x3333AA);
-        Color dist2Color = new Color(0x6666CC);
 
-        int selI = mGame.getSelectedCell() % GameBoard.WIDTH;
-        int selJ = mGame.getSelectedCell() / GameBoard.WIDTH;
+    private void drawBoard(Graphics g, GameBoard board, Rectangle bounds, int selI, int selJ) {
+        int cellRadius = CELL_RADIUS;
+
+        HexGridCell cellMetrics = new HexGridCell(cellRadius);
         for (int j = 0; j < GameBoard.HEIGHT; j++) {
             for (int i = 0; i < GameBoard.WIDTH; i++) {
-                byte c = mGame.getBoard().cell(i, j);
+                byte c = board.cell(i, j);
 
-                mCellMetrics.setCellIndex(i, j);
-                mCellMetrics.computeCorners(mCornersX, mCornersY);
+                cellMetrics.setCellIndex(i, j);
+                cellMetrics.computeCorners(mCornersX, mCornersY);
+                for (int cX: mCornersX) cX += bounds.getX();
+                for (int cY: mCornersY) cY += bounds.getY();
 
                 int dist = HexGridCell.walkDistance(i, j, selI, selJ);
                 Color bgColor = Color.DARK_GRAY;
                 if (mIsShowGrid && mIsShowRows) {
                     bgColor = (j % 2 == 1) ? Color.YELLOW : Color.GREEN;
                 }
-                bgColor = (c != 0) ? cellColor : bgColor;
+                bgColor = (c != 0) ? mCellColor : bgColor;
                 if (c == GameBoard.CELL_EMPTY) {
-                    bgColor = (dist == 1) ? dist1Color : bgColor;
-                    bgColor = (dist == 2) ? dist2Color : bgColor;
+                    bgColor = (dist == 1) ? mSelectedColor1 : bgColor;
+                    bgColor = (dist == 2) ? mSelectedColor2 : bgColor;
                 }
-                bgColor = (i == selI && j == selJ) ? selectedColor : bgColor;
+                bgColor = (dist == 0) ? mSelectedColor : bgColor;
 
                 if (bgColor != null) {
                     g.setColor(bgColor);
@@ -76,16 +75,14 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
 
                 if (c != 0) {
                     if (c == GameBoard.CELL_BLACK || c == GameBoard.CELL_WHITE) {
-                        int R = CELL_RADIUS - 6;
-                        g.setColor(mGame.getBoard().cell(i, j) == GameBoard.CELL_BLACK ? Color.BLACK
+                        int R = (int) (cellRadius* BALL_RATIO);
+                        int cx = (int) (cellMetrics.getCenterX() - R + bounds.getX());
+                        int cy = (int) (cellMetrics.getCenterY() - R + bounds.getY());
+                        g.setColor(board.cell(i, j) == GameBoard.CELL_BLACK ? Color.BLACK
                                 : Color.WHITE);
-                        g.fillArc(mCellMetrics.getCenterX() - R,
-                                mCellMetrics.getCenterY() - R, R * 2, R * 2, 0,
-                                360);
+                        g.fillArc(cx, cy, R * 2, R * 2, 0, 360);
                         g.setColor(Color.BLACK);
-                        g.drawArc(mCellMetrics.getCenterX() - R,
-                                mCellMetrics.getCenterY() - R, R * 2, R * 2, 0,
-                                360);
+                        g.drawArc(cx, cy, R * 2, R * 2, 0, 360);
                     }
                 }
 
@@ -103,17 +100,29 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
                     int w = (int)rect.getWidth();
                     int h = (int)rect.getHeight();
                     g.setFont(font);
-                    g.drawString(str,mCellMetrics.getCenterX() - w/2, mCellMetrics.getCenterY() + h/2);
+                    g.drawString(str, cellMetrics.getCenterX() - w/2, cellMetrics.getCenterY() + h/2);
                 }
             }
         }
     }
 
     @Override
+    public void paint(Graphics g) {
+        setBackground(Color.DARK_GRAY);
+
+        Rectangle bounds = getBounds();
+        int selIdx = mGame.getSelectedCell();
+        int selI = selIdx >= 0 ? selIdx % GameBoard.WIDTH : -1;
+        int selJ = selIdx >= 0 ? selIdx / GameBoard.WIDTH : -1;
+        drawBoard(g, mGame.getBoard(), bounds, selI, selJ);
+    }
+
+    @Override
     public void mouseReleased(MouseEvent arg0) {
-        mCellMetrics.setCellByPoint(arg0.getX(), arg0.getY());
-        int clickI = mCellMetrics.getIndexI();
-        int clickJ = mCellMetrics.getIndexJ();
+        HexGridCell cellMetrics = new HexGridCell(CELL_RADIUS);
+        cellMetrics.setCellByPoint(arg0.getX(), arg0.getY());
+        int clickI = cellMetrics.getIndexI();
+        int clickJ = cellMetrics.getIndexJ();
         int clickCell = clickI + clickJ * GameBoard.WIDTH;
 
         if (clickI >= 0 && clickI < GameBoard.WIDTH && clickJ >= 0

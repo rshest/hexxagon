@@ -107,17 +107,17 @@ public class HexxagonActivity extends Activity implements Platform
 
     private void saveLevelsToSD() {
         boolean mExternalStorageAvailable = false;
-        boolean mExternalStorageWriteable = false;
+        boolean mExternalStorageWritable = false;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mExternalStorageAvailable = mExternalStorageWriteable = true;
+            mExternalStorageAvailable = mExternalStorageWritable = true;
         } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             mExternalStorageAvailable = true;
-            mExternalStorageWriteable = false;
+            mExternalStorageWritable = false;
         }
 
         if (!mExternalStorageAvailable) popup("No external storage available!", null);
-        else if (!mExternalStorageWriteable) popup("External storage is not writable!", null);
+        else if (!mExternalStorageWritable) popup("External storage is not writable!", null);
         else {
             final File file = new File(Environment.getExternalStorageDirectory(), "levels.txt");
             if (file.exists()) {
