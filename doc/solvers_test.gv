@@ -1,0 +1,22 @@
+digraph g {
+node [shape = record,height=.1];
+size="7,2"; ratio = fill;
+D1 [ label = "-6" ];
+D2 [ label = "-5" ];
+D3 [ label = "-3" ];
+E1 [ label = "-7" ];
+E2 [ label = "0" ];
+F1 [ label = "-1" ];
+F2 [ label = "-4" ];
+F3 [ label = "-2" ];
+G1 [ label = "-8" ];
+G2 [ label = "-9" ];
+
+"."->B; "."->C;
+B->D; B->E;
+C->F; C->G;
+D->D1; D->D2; D->D3;
+E->E1; E->E2;
+F->F1; F-> F2; F->F3;
+G->G1; G->G2;
+}
