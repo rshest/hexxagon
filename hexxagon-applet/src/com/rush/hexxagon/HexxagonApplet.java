@@ -14,7 +14,6 @@ import java.awt.geom.Rectangle2D;
  */
 public class HexxagonApplet extends Applet implements MouseListener, Platform {
     static final float BALL_RATIO = 0.8f;
-    static final int CELL_RADIUS = 22;
 
     static final Color mCellColor = new Color(0xAAAAAA);
     static final Color mSelectedColor = new Color(0x8888FF);
@@ -30,6 +29,8 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
 
     HexxagonGame mGame = new HexxagonGame(this);
 
+    int mCurCellRadius = 22;
+
     @Override
     public void init() {
         addMouseListener(this);
@@ -43,8 +44,13 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
     }
 
 
+
     private void drawBoard(Graphics g, HexxagonBoard board, Rectangle bounds, int selI, int selJ) {
-        int cellRadius = CELL_RADIUS;
+        int cellRadius = mCurCellRadius;
+
+        HexxagonBoard.Extents cext = board.getBoardExtents();
+        HexGridCell measureCell = new HexGridCell(100);
+        measureCell.getAreaExtents(cext.left, cext.top, cext.right, cext.bottom);
 
         HexGridCell cellMetrics = new HexGridCell(cellRadius);
         for (int j = 0; j < HexxagonBoard.HEIGHT; j++) {
@@ -119,7 +125,7 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
 
     @Override
     public void mouseReleased(MouseEvent arg0) {
-        HexGridCell cellMetrics = new HexGridCell(CELL_RADIUS);
+        HexGridCell cellMetrics = new HexGridCell(mCurCellRadius);
         cellMetrics.setCellByPoint(arg0.getX(), arg0.getY());
         int clickI = cellMetrics.getIndexI();
         int clickJ = cellMetrics.getIndexJ();

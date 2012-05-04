@@ -189,4 +189,26 @@ public class HexGridCell {
         return Math.max(Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2)),
                 Math.abs(z1 - z2));
     }
+
+    public static class Extents
+    {
+        public Extents(int _x, int _y, int _w, int _h) {
+            x = _x;
+            y = _y;
+            w = _w;
+            h = _h;
+        }
+        public int x;
+        public int y;
+        public int w;
+        public int h;
+    }
+
+    public Extents getAreaExtents(int cl, int ct, int cr, int cb) {
+        int x = SIDE*cl;
+        int w = SIDE*cr + RADIUS*2 - x;
+        int y = HEIGHT * (2 * ct + (cl % 2)) / 2;
+        int h = HEIGHT * (2 * cb + (cr % 2)) / 2 + HEIGHT - y;
+        return new Extents(x, y, w, h);
+    }
 }

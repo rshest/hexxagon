@@ -3,16 +3,16 @@ package com.rush.hexxagon.test;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-class RefGame {
-    public static class RefMove implements GameMove {
+class MockGame {
+    public static class MockMove implements GameMove {
         protected Position position;
     }
 
-    public static class RefBoard implements GameBoard {
-        RefGame mGame;
+    public static class MockBoard implements GameBoard {
+        MockGame mGame;
         protected Position position = new Position();
 
-        RefBoard(RefGame game) {
+        MockBoard(MockGame game) {
             mGame = game;
         }
 
@@ -21,7 +21,7 @@ class RefGame {
             position.visited = true;
             ArrayList<GameMove> moves = new ArrayList<GameMove>();
             for (Position p: position.children) {
-                RefMove move = new RefMove();
+                MockMove move = new MockMove();
                 move.position = p;
                 moves.add(move);
             }
@@ -29,13 +29,13 @@ class RefGame {
         }
 
         @Override
-        public int evaluate(byte playerID) {
+        public int evaluate(byte playerID, boolean canMove) {
             return position.value;
         }
 
         @Override
         public boolean move(GameMove move) {
-            position = ((RefMove)move).position;
+            position = ((MockMove)move).position;
             return true;
         }
 
@@ -46,12 +46,12 @@ class RefGame {
 
         @Override
         public void copy(GameBoard board) {
-            position = ((RefBoard)board).position;
+            position = ((MockBoard)board).position;
         }
 
         @Override
         public GameBoard clone() {
-            RefBoard b = new RefBoard(mGame);
+            MockBoard b = new MockBoard(mGame);
             b.position = position;
             return b;
         }
@@ -69,8 +69,7 @@ class RefGame {
                 return this;
             } else {
                 int dotIdx = path.indexOf('.');
-                if (dotIdx < 0) return null;
-                String head = path.substring(0, dotIdx);
+                String head = (dotIdx < 0) ? path : path.substring(0, dotIdx);
                 String newPath = path.substring(dotIdx + 1);
                 for (Position p: children) {
                     if (p.id.equals(head)) {
@@ -82,13 +81,19 @@ class RefGame {
             }
         }
 
-        public void resetVisited() {
-            visited = false;
-            for (Position p: children) p.resetVisited();
+        public int countVisited(boolean bVisited) {
+            int res = (visited == bVisited) ? 1 : 0;
+            for (Position p: children) res += p.countVisited(bVisited);
+            return res;
+        }
+
+        public void resetVisited(boolean val) {
+            visited = val;
+            for (Position p: children) p.resetVisited(val);
         }
     }
 
-    protected RefBoard mRootBoard = new RefBoard(this);
+    protected MockBoard mRootBoard = new MockBoard(this);
 
     /**
      *  Example string encoding the game tree:
@@ -101,7 +106,7 @@ class RefGame {
      *  ---  --  ---  --
      *  653  70  142  89 <- leave values
      */
-    RefGame(String gameTree) {
+    MockGame(String gameTree) {
         //  parse leaves
         String[] lines = gameTree.split(",");
         Hashtable<String, Position> posTable = new Hashtable<String, Position>();

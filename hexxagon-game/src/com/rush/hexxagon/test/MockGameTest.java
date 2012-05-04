@@ -5,13 +5,13 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-public class RefGameTest {
+public class MockGameTest {
 
     private static final String GAME_TREE =
             "B.D.1=6, B.D.2=5, B.D.3=3, B.E.1=7, B.E.2=0, " +
             "C.F.1=1, C.F.2=4, C.F.3=2, C.G.1=8, C.G.2=9";
 
-    RefGame mGame = new RefGame(GAME_TREE);
+    MockGame mGame = new MockGame(GAME_TREE);
 
     @Test
     public void testParsing() throws Exception {
@@ -20,7 +20,7 @@ public class RefGameTest {
         ArrayList<GameMove> rootMoves = mGame.mRootBoard.getPossibleMoves(playerID);
         Assert.assertEquals(2, rootMoves.size());
 
-        RefGame.RefBoard b = (RefGame.RefBoard) mGame.mRootBoard.clone();
+        MockGame.MockBoard b = (MockGame.MockBoard) mGame.mRootBoard.clone();
         b.move(rootMoves.get(0));
 
         ArrayList<GameMove> moves1 = b.getPossibleMoves(b.getOtherPlayerID(playerID));
@@ -32,7 +32,7 @@ public class RefGameTest {
 
         b.move(moves2.get(1));
         Assert.assertEquals(0, b.getPossibleMoves(b.getOtherPlayerID(playerID)).size());
-        Assert.assertEquals(5, b.evaluate(b.getOtherPlayerID(playerID)));
+        Assert.assertEquals(5, b.evaluate(b.getOtherPlayerID(playerID), true));
     }
 
     @Test
