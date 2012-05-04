@@ -26,18 +26,18 @@ public class AIPlayer extends Player {
     }
 
     private class SolverTask implements Runnable {
-        private Game _game;
+        private HexxagonGame _game;
         private BaseSolver _solver;
-        SolverTask(Game game, BaseSolver solver) {
+        SolverTask(HexxagonGame game, BaseSolver solver) {
             _game = game;
             _solver = solver;
         }
         public void run() {
-            GameBoard board = _game.getBoard();
+            HexxagonBoard board = _game.getBoard();
 
             final long startTime = System.currentTimeMillis();
-            Move bestMove = _solver.getBestMove(board, getColor());
-            System.out.format("Color: %s; ", getColor() == GameBoard.CELL_BLACK ? "Black" : "White");
+            HexxagonMove bestMove = _solver.getBestMove(board, getColor());
+            System.out.format("Color: %s; ", getColor() == HexxagonBoard.CELL_BLACK ? "Black" : "White");
             if (bestMove != null) {
                 board.move(bestMove.from, bestMove.to);
                 System.out.format("Best move: %d->%d; ", bestMove.from, bestMove.to);
@@ -55,7 +55,7 @@ public class AIPlayer extends Player {
         }
     }
 
-    public void startMove(Game game) {
+    public void startMove(HexxagonGame game) {
         new Thread(new SolverTask(game, mSolver)).start();
     }
 

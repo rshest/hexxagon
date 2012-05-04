@@ -2,7 +2,7 @@ package com.rush.hexxagon;
 
 import java.util.ArrayList;
 
-public class GameBoard {
+public class HexxagonBoard {
 
     public static final int BIG_VALUE = 1000000;
     public static final int WIDTH = 16;
@@ -15,17 +15,17 @@ public class GameBoard {
     public static final byte CELL_WHITE = 3;
 
     public static byte getFoeColor(byte color) {
-        return (color == GameBoard.CELL_BLACK) ? GameBoard.CELL_WHITE : GameBoard.CELL_BLACK;
+        return (color == HexxagonBoard.CELL_BLACK) ? HexxagonBoard.CELL_WHITE : HexxagonBoard.CELL_BLACK;
     }
 
     // game board cells array
     private byte[] mCells;
 
-    public GameBoard() {
+    public HexxagonBoard() {
         mCells = new byte[NUM_CELLS];
     }
 
-    public GameBoard(GameBoard b) {
+    public HexxagonBoard(HexxagonBoard b) {
         mCells = b.mCells.clone();
     }
 
@@ -49,7 +49,7 @@ public class GameBoard {
         }
     }
 
-    public void copy(GameBoard b) {
+    public void copy(HexxagonBoard b) {
         System.arraycopy(b.mCells, 0, mCells, 0, NUM_CELLS);
     }
 
@@ -63,10 +63,10 @@ public class GameBoard {
     }
 
     public Extents getBoardExtents() {
-        Extents r = new Extents(GameBoard.WIDTH, GameBoard.HEIGHT, 0, 0);
-        for (int j = 0; j < GameBoard.HEIGHT; j++) {
-            for (int i = 0; i < GameBoard.WIDTH; i++) {
-                if (mCells[i + j*GameBoard.WIDTH] != CELL_NONE) {
+        Extents r = new Extents(HexxagonBoard.WIDTH, HexxagonBoard.HEIGHT, 0, 0);
+        for (int j = 0; j < HexxagonBoard.HEIGHT; j++) {
+            for (int i = 0; i < HexxagonBoard.WIDTH; i++) {
+                if (mCells[i + j* HexxagonBoard.WIDTH] != CELL_NONE) {
                    r.top = Math.min(r.top, j);
                    r.left = Math.min(r.left, i);
                    r.bottom = Math.max(r.bottom, j);
@@ -86,7 +86,7 @@ public class GameBoard {
     }
 
     public boolean isCellFree(int idx) {
-        return (mCells[idx] != GameBoard.CELL_BLACK && mCells[idx] != GameBoard.CELL_WHITE);
+        return (mCells[idx] != HexxagonBoard.CELL_BLACK && mCells[idx] != HexxagonBoard.CELL_WHITE);
     }
 
     public void setCell(int idx, byte val) {
@@ -103,14 +103,14 @@ public class GameBoard {
     }
 
     public int move(int from, int to) {
-        int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
-                / GameBoard.WIDTH, to % GameBoard.WIDTH, to / GameBoard.WIDTH);
-        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2) {
+        int dist = HexGridCell.walkDistance(from % HexxagonBoard.WIDTH, from
+                / HexxagonBoard.WIDTH, to % HexxagonBoard.WIDTH, to / HexxagonBoard.WIDTH);
+        if (from >= 0 && to >= 0 && mCells[to] == HexxagonBoard.CELL_EMPTY && dist <= 2) {
             int numAdded = 1;
             byte myCell = mCells[from];
             setCell(to, myCell);
             if (dist == 2) {
-                setCell(from, GameBoard.CELL_EMPTY);
+                setCell(from, HexxagonBoard.CELL_EMPTY);
                 numAdded = 0;
             }
             numAdded += captureNeighbors(to);
@@ -134,9 +134,9 @@ public class GameBoard {
     public int getMoveAdded(short from, short to) {
         int toI = to % WIDTH;
         int toJ = to / WIDTH;
-        int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
-                / GameBoard.WIDTH, toI, toJ);
-        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2 && dist > 0) {
+        int dist = HexGridCell.walkDistance(from % HexxagonBoard.WIDTH, from
+                / HexxagonBoard.WIDTH, toI, toJ);
+        if (from >= 0 && to >= 0 && mCells[to] == HexxagonBoard.CELL_EMPTY && dist <= 2 && dist > 0) {
             return 2 - dist + getNumToCapture(toI, toJ, getFoeColor(mCells[from]));
         }
         return 0;
@@ -145,9 +145,9 @@ public class GameBoard {
     public int getMoveDiff(short from, short to) {
         int toI = to % WIDTH;
         int toJ = to / WIDTH;
-        int dist = HexGridCell.walkDistance(from % GameBoard.WIDTH, from
-                / GameBoard.WIDTH, toI, toJ);
-        if (from >= 0 && to >= 0 && mCells[to] == GameBoard.CELL_EMPTY && dist <= 2 && dist > 0) {
+        int dist = HexGridCell.walkDistance(from % HexxagonBoard.WIDTH, from
+                / HexxagonBoard.WIDTH, toI, toJ);
+        if (from >= 0 && to >= 0 && mCells[to] == HexxagonBoard.CELL_EMPTY && dist <= 2 && dist > 0) {
             //  each captured cell counts for a difference of 2
             return 2 - dist + 2*(getNumToCapture(toI, toJ, getFoeColor(mCells[from])));
         }
@@ -159,7 +159,7 @@ public class GameBoard {
         int cJ = to / WIDTH;
         byte color = mCells[to];
         int numCaptured = 0;
-        byte foeColor = GameBoard.getFoeColor(color);
+        byte foeColor = HexxagonBoard.getFoeColor(color);
         for (int i = 0; i < HexGridCell.NUM_NEIGHBORS; i++) {
             int nI = HexGridCell.getNeighborI(cI, cJ, i);
             int nJ = HexGridCell.getNeighborJ(cI, cJ, i);
@@ -175,21 +175,21 @@ public class GameBoard {
         return nI >= 0 && nJ >= 0 && nI < WIDTH && nJ < HEIGHT;
     }
 
-    public ArrayList<Move> getPossibleMoves(byte player) {
-        ArrayList<Move> moves = new ArrayList<Move>();
-        for (byte j = 0; j < GameBoard.HEIGHT; j++) {
-            for (byte i = 0; i < GameBoard.WIDTH; i++) {
-                short cellIdx = (short)(i + j * GameBoard.WIDTH);
-                if (mCells[cellIdx] == GameBoard.CELL_EMPTY) {
+    public ArrayList<HexxagonMove> getPossibleMoves(byte player) {
+        ArrayList<HexxagonMove> moves = new ArrayList<HexxagonMove>();
+        for (byte j = 0; j < HexxagonBoard.HEIGHT; j++) {
+            for (byte i = 0; i < HexxagonBoard.WIDTH; i++) {
+                short cellIdx = (short)(i + j * HexxagonBoard.WIDTH);
+                if (mCells[cellIdx] == HexxagonBoard.CELL_EMPTY) {
                     // the cell can be moved to
                     // check the near neighbors (a single one of the is enough)
                     for (int k = 0; k < HexGridCell.NUM_NEIGHBORS; k++) {
                         int ni = HexGridCell.getNeighborI(i, j, k);
                         int nj = HexGridCell.getNeighborJ(i, j, k);
                         if (inBoard(ni, nj)) {
-                            short n = (short)(ni + nj * GameBoard.WIDTH);
+                            short n = (short)(ni + nj * HexxagonBoard.WIDTH);
                             if (mCells[n] == player) {
-                                moves.add(new Move(n, cellIdx));
+                                moves.add(new HexxagonMove(n, cellIdx));
                                 break;
                             }
                         }
@@ -198,9 +198,9 @@ public class GameBoard {
                         int ni = HexGridCell.getNeighbor2I(i, j, k);
                         int nj = HexGridCell.getNeighbor2J(i, j, k);
                         if (inBoard(ni, nj)) {
-                            short n = (short)(ni + nj * GameBoard.WIDTH);
+                            short n = (short)(ni + nj * HexxagonBoard.WIDTH);
                             if (mCells[n] == player) {
-                                moves.add(new Move(n, cellIdx));
+                                moves.add(new HexxagonMove(n, cellIdx));
                             }
                         }
                     }
@@ -234,6 +234,6 @@ public class GameBoard {
     public int getValue(byte color) {
         int myCells = getNumCells(color);
         int foeCells = getNumCells(getFoeColor(color));
-        return myCells > 0 ? myCells - foeCells : -GameBoard.BIG_VALUE;
+        return myCells > 0 ? myCells - foeCells : -HexxagonBoard.BIG_VALUE;
     }
 }

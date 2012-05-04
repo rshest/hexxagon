@@ -1,8 +1,8 @@
 package com.rush.hexxagon.test;
 
 
-import com.rush.hexxagon.GameBoard;
-import com.rush.hexxagon.Move;
+import com.rush.hexxagon.HexxagonMove;
+import com.rush.hexxagon.HexxagonBoard;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,12 +25,12 @@ public class GameBoardTest {
 
     @Test
     public void testGetMoveAdded() throws Exception {
-        GameBoard board = new GameBoard();
+        HexxagonBoard board = new HexxagonBoard();
         board.init(BOARD);
 
-        ArrayList<Move> moves = board.getPossibleMoves(GameBoard.CELL_WHITE);
-        for (Move move: moves) {
-            GameBoard newBoard = new GameBoard(board);
+        ArrayList<HexxagonMove> moves = board.getPossibleMoves(HexxagonBoard.CELL_WHITE);
+        for (HexxagonMove move: moves) {
+            HexxagonBoard newBoard = new HexxagonBoard(board);
             byte color = board.cell(move.from);
             int numAdded = board.getMoveAdded(move.from, move.to);
 
@@ -41,8 +41,8 @@ public class GameBoardTest {
             Assert.assertEquals(numAdded, cellsAdded);
 
             int moveDiff = board.getMoveDiff(move.from, move.to);
-            int oldDiff = board.getNumCells(color) - board.getNumCells(GameBoard.getFoeColor(color));
-            int newDiff = newBoard.getNumCells(color) - newBoard.getNumCells(GameBoard.getFoeColor(color));
+            int oldDiff = board.getNumCells(color) - board.getNumCells(HexxagonBoard.getFoeColor(color));
+            int newDiff = newBoard.getNumCells(color) - newBoard.getNumCells(HexxagonBoard.getFoeColor(color));
             int cellsDiff = newDiff - oldDiff;
             Assert.assertEquals(cellsDiff, moveDiff);
         }

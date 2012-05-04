@@ -10,16 +10,16 @@ public class MinMaxSolver extends BaseSolver {
         mMaxDepth = maxDepth;
     }
 
-    public void evaluateMoves(GameBoard board, byte color, ArrayList<Move> moves) {
-//        GameBoard b = new GameBoard();
+    public void evaluateMoves(HexxagonBoard board, byte color, ArrayList<HexxagonMove> moves) {
+//        HexxagonBoard b = new HexxagonBoard();
 //        int baseValue = board.getValue(color);
-//        byte foeColor = (color == GameBoard.CELL_BLACK) ? GameBoard.CELL_WHITE : GameBoard.CELL_BLACK;
+//        byte foeColor = (color == HexxagonBoard.CELL_BLACK) ? HexxagonBoard.CELL_WHITE : HexxagonBoard.CELL_BLACK;
 //
 //        Random rnd = new Random();
-//        int bestValue = -GameBoard.BIG_VALUE;
+//        int bestValue = -HexxagonBoard.BIG_VALUE;
 //        int nMax = 0;
-//        Move bestMove = null;
-//        for (Move move : moves) {
+//        HexxagonMove bestMove = null;
+//        for (HexxagonMove move : moves) {
 //            mTotalMovesSearched++;
 //            int value;
 //            b.copy(board);
@@ -27,8 +27,8 @@ public class MinMaxSolver extends BaseSolver {
 //            if (depth <= 1) {
 //                value = numAdded + baseValue;
 //            } else {
-//                Move m = getBestMove(b, foeColor, depth - 1);
-//                value = (m != null) ? -m.value : GameBoard.BIG_VALUE;
+//                HexxagonMove m = getBestMove(b, foeColor, depth - 1);
+//                value = (m != null) ? -m.value : HexxagonBoard.BIG_VALUE;
 //            }
 //            if (value > bestValue) {
 //                bestValue = value;
@@ -48,21 +48,21 @@ public class MinMaxSolver extends BaseSolver {
 //        return bestMove;
     }
 
-    public Move getBestMove(GameBoard board, byte color, int depth) {
-        ArrayList<Move> moves = board.getPossibleMoves(color);
+    public HexxagonMove getBestMove(HexxagonBoard board, byte color, int depth) {
+        ArrayList<HexxagonMove> moves = board.getPossibleMoves(color);
         if (moves.size() == 0) {
             return null;
         }
 
-        GameBoard b = new GameBoard();
+        HexxagonBoard b = new HexxagonBoard();
         int baseValue = board.getValue(color);
-        byte foeColor = GameBoard.getFoeColor(color);
+        byte foeColor = HexxagonBoard.getFoeColor(color);
 
         Random rnd = new Random();
-        int bestValue = -GameBoard.BIG_VALUE;
+        int bestValue = -HexxagonBoard.BIG_VALUE;
         int nMax = 0;
-        Move bestMove = null;
-        for (Move move : moves) {
+        HexxagonMove bestMove = null;
+        for (HexxagonMove move : moves) {
             mTotalMovesSearched++;
             int value;
             b.copy(board);
@@ -70,8 +70,8 @@ public class MinMaxSolver extends BaseSolver {
             if (depth <= 1) {
                 value = numAdded + baseValue;
             } else {
-                Move m = getBestMove(b, foeColor, depth - 1);
-                value = (m != null) ? -m.value : GameBoard.BIG_VALUE;
+                HexxagonMove m = getBestMove(b, foeColor, depth - 1);
+                value = (m != null) ? -m.value : HexxagonBoard.BIG_VALUE;
             }
             if (value > bestValue) {
                 bestValue = value;
@@ -91,7 +91,7 @@ public class MinMaxSolver extends BaseSolver {
         return bestMove;
     }
 
-    public Move getBestMove(GameBoard board, byte color) {
+    public HexxagonMove getBestMove(HexxagonBoard board, byte color) {
         return getBestMove(board, color, mMaxDepth);
     }
 }

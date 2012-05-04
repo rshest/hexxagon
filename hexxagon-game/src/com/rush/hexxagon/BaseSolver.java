@@ -13,24 +13,24 @@ public class BaseSolver {
         return mTotalMovesSearched;
     }
 
-    public void evaluateMoves(GameBoard board, byte color, ArrayList<Move> moves) {
+    public void evaluateMoves(HexxagonBoard board, byte color, ArrayList<HexxagonMove> moves) {
         int baseValue = board.getValue(color);
-        for (Move move : moves) {
+        for (HexxagonMove move : moves) {
             move.value = baseValue + board.getMoveDiff(move.from, move.to);
         }
     }
 
-    public static void sortMoves(ArrayList<Move> moves) {
-        Collections.sort(moves, new Comparator<Move>() {
+    public static void sortMoves(ArrayList<HexxagonMove> moves) {
+        Collections.sort(moves, new Comparator<HexxagonMove>() {
             @Override
-            public int compare(Move o1, Move o2) {
+            public int compare(HexxagonMove o1, HexxagonMove o2) {
                 return o2.value - o1.value;
             }
         });
     }
 
-    public static Move getBestMove(ArrayList<Move> moves, boolean isOrdered) {
-        Move bestMove = null;
+    public static HexxagonMove getBestMove(ArrayList<HexxagonMove> moves, boolean isOrdered) {
+        HexxagonMove bestMove = null;
         if (isOrdered && moves.size() > 0) {
             int bestValue = moves.get(0).value;
             int nMoves = moves.size();
@@ -44,9 +44,9 @@ public class BaseSolver {
         else {
             // if the moves are not ordered, then perform "reservoir sampling"
             // to choose the random move from the best ones
-            int bestValue = -GameBoard.BIG_VALUE;
+            int bestValue = -HexxagonBoard.BIG_VALUE;
             int nMax = 0;
-            for (Move move : moves) {
+            for (HexxagonMove move : moves) {
                 if (move.value > bestValue) {
                     bestValue = move.value;
                     bestMove = move;
@@ -62,7 +62,7 @@ public class BaseSolver {
         return bestMove;
     }
 
-    public Move getBestMove(GameBoard board, byte color) {
+    public HexxagonMove getBestMove(HexxagonBoard board, byte color) {
         return null;
     }
 }

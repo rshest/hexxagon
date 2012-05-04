@@ -6,8 +6,8 @@ public class HumanPlayer extends Player {
         super(cellColor);
     }
 
-    public void onClickCell(int cellIdx, Game game) {
-        GameBoard board = game.getBoard();
+    public void onClickCell(int cellIdx, HexxagonGame game) {
+        HexxagonBoard board = game.getBoard();
         byte cellContents = board.cell(cellIdx);
         if (game.getSelectedCell() == cellIdx) {
             // unselect the cell

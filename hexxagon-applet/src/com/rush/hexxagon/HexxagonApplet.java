@@ -28,7 +28,7 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
     boolean mIsShowRows = false;
     boolean mIsShowIdx = false;
 
-    Game mGame = new Game(this);
+    HexxagonGame mGame = new HexxagonGame(this);
 
     @Override
     public void init() {
@@ -43,12 +43,12 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
     }
 
 
-    private void drawBoard(Graphics g, GameBoard board, Rectangle bounds, int selI, int selJ) {
+    private void drawBoard(Graphics g, HexxagonBoard board, Rectangle bounds, int selI, int selJ) {
         int cellRadius = CELL_RADIUS;
 
         HexGridCell cellMetrics = new HexGridCell(cellRadius);
-        for (int j = 0; j < GameBoard.HEIGHT; j++) {
-            for (int i = 0; i < GameBoard.WIDTH; i++) {
+        for (int j = 0; j < HexxagonBoard.HEIGHT; j++) {
+            for (int i = 0; i < HexxagonBoard.WIDTH; i++) {
                 byte c = board.cell(i, j);
 
                 cellMetrics.setCellIndex(i, j);
@@ -62,7 +62,7 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
                     bgColor = (j % 2 == 1) ? Color.YELLOW : Color.GREEN;
                 }
                 bgColor = (c != 0) ? mCellColor : bgColor;
-                if (c == GameBoard.CELL_EMPTY) {
+                if (c == HexxagonBoard.CELL_EMPTY) {
                     bgColor = (dist == 1) ? mSelectedColor1 : bgColor;
                     bgColor = (dist == 2) ? mSelectedColor2 : bgColor;
                 }
@@ -74,11 +74,11 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
                 }
 
                 if (c != 0) {
-                    if (c == GameBoard.CELL_BLACK || c == GameBoard.CELL_WHITE) {
+                    if (c == HexxagonBoard.CELL_BLACK || c == HexxagonBoard.CELL_WHITE) {
                         int R = (int) (cellRadius* BALL_RATIO);
                         int cx = (int) (cellMetrics.getCenterX() - R + bounds.getX());
                         int cy = (int) (cellMetrics.getCenterY() - R + bounds.getY());
-                        g.setColor(board.cell(i, j) == GameBoard.CELL_BLACK ? Color.BLACK
+                        g.setColor(board.cell(i, j) == HexxagonBoard.CELL_BLACK ? Color.BLACK
                                 : Color.WHITE);
                         g.fillArc(cx, cy, R * 2, R * 2, 0, 360);
                         g.setColor(Color.BLACK);
@@ -94,7 +94,7 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
                 if (mIsShowIdx) {
                     g.setColor(Color.BLUE);
                     Font font = new Font("Serif", Font.PLAIN, 9);
-                    String str = "" + (i + j*GameBoard.WIDTH);
+                    String str = "" + (i + j* HexxagonBoard.WIDTH);
                     FontMetrics fm = getFontMetrics(font);
                     Rectangle2D rect = fm.getStringBounds(str, g);
                     int w = (int)rect.getWidth();
@@ -112,8 +112,8 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
 
         Rectangle bounds = getBounds();
         int selIdx = mGame.getSelectedCell();
-        int selI = selIdx >= 0 ? selIdx % GameBoard.WIDTH : -1;
-        int selJ = selIdx >= 0 ? selIdx / GameBoard.WIDTH : -1;
+        int selI = selIdx >= 0 ? selIdx % HexxagonBoard.WIDTH : -1;
+        int selJ = selIdx >= 0 ? selIdx / HexxagonBoard.WIDTH : -1;
         drawBoard(g, mGame.getBoard(), bounds, selI, selJ);
     }
 
@@ -123,10 +123,10 @@ public class HexxagonApplet extends Applet implements MouseListener, Platform {
         cellMetrics.setCellByPoint(arg0.getX(), arg0.getY());
         int clickI = cellMetrics.getIndexI();
         int clickJ = cellMetrics.getIndexJ();
-        int clickCell = clickI + clickJ * GameBoard.WIDTH;
+        int clickCell = clickI + clickJ * HexxagonBoard.WIDTH;
 
-        if (clickI >= 0 && clickI < GameBoard.WIDTH && clickJ >= 0
-                && clickJ < GameBoard.HEIGHT) {
+        if (clickI >= 0 && clickI < HexxagonBoard.WIDTH && clickJ >= 0
+                && clickJ < HexxagonBoard.HEIGHT) {
             mGame.getCurrentPlayer().onClickCell(clickCell, mGame);
         }
     }

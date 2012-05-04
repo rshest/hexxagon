@@ -44,11 +44,11 @@ public class HexxagonActivity extends Activity implements Platform
     Path mHexPath = new Path();
     Paint mPaint = new Paint();
 
-    private Game mGame = new Game(this);
+    private HexxagonGame mGame = new HexxagonGame(this);
 
     private int mBoardX = 0;
     private int mBoardY = 0;
-    private byte mCurEditorCellType = GameBoard.CELL_NONE;
+    private byte mCurEditorCellType = HexxagonBoard.CELL_NONE;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -80,7 +80,7 @@ public class HexxagonActivity extends Activity implements Platform
                     mIsShowGrid = true;
                     mGame.selectCell(-1);
                     findViewById(R.id.editor_hud).setVisibility(View.VISIBLE);
-                    mView.focusBoardView(new GameBoard.Extents());
+                    mView.focusBoardView(new HexxagonBoard.Extents());
                 }
                 break;
             case R.id.play_level:
@@ -154,10 +154,10 @@ public class HexxagonActivity extends Activity implements Platform
     public void onRadioButtonClicked(View v) {
         RadioButton rb = (RadioButton) v;
         switch (rb.getId()) {
-            case R.id.radio_none: mCurEditorCellType = GameBoard.CELL_NONE; break;
-            case R.id.radio_empty: mCurEditorCellType = GameBoard.CELL_EMPTY; break;
-            case R.id.radio_black: mCurEditorCellType = GameBoard.CELL_BLACK; break;
-            case R.id.radio_white: mCurEditorCellType = GameBoard.CELL_WHITE; break;
+            case R.id.radio_none: mCurEditorCellType = HexxagonBoard.CELL_NONE; break;
+            case R.id.radio_empty: mCurEditorCellType = HexxagonBoard.CELL_EMPTY; break;
+            case R.id.radio_black: mCurEditorCellType = HexxagonBoard.CELL_BLACK; break;
+            case R.id.radio_white: mCurEditorCellType = HexxagonBoard.CELL_WHITE; break;
         }
     }
 
@@ -261,8 +261,8 @@ public class HexxagonActivity extends Activity implements Platform
             public void run() {
                 mView.focusBoardView(null);
                 // update the counters display
-                String strNumBlack = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_BLACK));
-                String strNumWhite = Integer.toString(mGame.getBoard().getNumCells(GameBoard.CELL_WHITE));
+                String strNumBlack = Integer.toString(mGame.getBoard().getNumCells(HexxagonBoard.CELL_BLACK));
+                String strNumWhite = Integer.toString(mGame.getBoard().getNumCells(HexxagonBoard.CELL_WHITE));
 
                 ((TextView)findViewById(R.id.white_count_text)).setText(strNumWhite);
                 ((TextView)findViewById(R.id.black_count_text)).setText(strNumBlack);
@@ -299,7 +299,7 @@ public class HexxagonActivity extends Activity implements Platform
             getHolder().addCallback(this);
         }
 
-        public synchronized void focusBoardView(GameBoard.Extents ext) {
+        public synchronized void focusBoardView(HexxagonBoard.Extents ext) {
             if (ext == null) {
                 ext = mGame.getBoard().getBoardExtents();
             }
@@ -343,10 +343,10 @@ public class HexxagonActivity extends Activity implements Platform
             int dist1Color = 0xFF3333AA;
             int dist2Color = 0xFF6666CC;
 
-            int selI = mGame.getSelectedCell()%GameBoard.WIDTH;
-            int selJ = mGame.getSelectedCell()/GameBoard.WIDTH;
-            for (int j = 0; j < GameBoard.HEIGHT; j++) {
-                for (int i = 0; i < GameBoard.WIDTH; i++) {
+            int selI = mGame.getSelectedCell()% HexxagonBoard.WIDTH;
+            int selJ = mGame.getSelectedCell()/ HexxagonBoard.WIDTH;
+            for (int j = 0; j < HexxagonBoard.HEIGHT; j++) {
+                for (int i = 0; i < HexxagonBoard.WIDTH; i++) {
                     byte c = mGame.getBoard().cell(i, j);
 
                     mMetrics.setCellIndex(i, j);
@@ -359,7 +359,7 @@ public class HexxagonActivity extends Activity implements Platform
                         bgColor = (j%2 == 1) ? Color.YELLOW : Color.GREEN;
                     }
                     bgColor = (c != 0) ? cellColor : bgColor;
-                    if (c == GameBoard.CELL_EMPTY) {
+                    if (c == HexxagonBoard.CELL_EMPTY) {
                         bgColor = (dist == 1) ? dist1Color : bgColor;
                         bgColor = (dist == 2) ? dist2Color : bgColor;
                     }
@@ -372,10 +372,10 @@ public class HexxagonActivity extends Activity implements Platform
                     }
 
                     if (c != 0) {
-                        if (c == GameBoard.CELL_BLACK || c == GameBoard.CELL_WHITE) {
+                        if (c == HexxagonBoard.CELL_BLACK || c == HexxagonBoard.CELL_WHITE) {
                             float R = mCellRadius*mBallRatio;
                             mPaint.setStyle(Paint.Style.FILL);
-                            mPaint.setColor(mGame.getBoard().cell(i, j) == GameBoard.CELL_BLACK ? Color.BLACK
+                            mPaint.setColor(mGame.getBoard().cell(i, j) == HexxagonBoard.CELL_BLACK ? Color.BLACK
                                     : Color.WHITE);
                             canvas.drawCircle(mMetrics.getCenterX() + mBoardX, mMetrics.getCenterY() + mBoardY, R, mPaint);
                             mPaint.setColor(Color.BLACK);
@@ -403,7 +403,7 @@ public class HexxagonActivity extends Activity implements Platform
                 metrics.setCellByPoint((int)event.getX() - mBoardX, (int)event.getY() - mBoardY);
                 int clickI = metrics.getIndexI();
                 int clickJ = metrics.getIndexJ();
-                int clickCell = clickI + clickJ * GameBoard.WIDTH;
+                int clickCell = clickI + clickJ * HexxagonBoard.WIDTH;
 
                 if (mGame.getBoard().inBoard(clickI, clickJ)) {
                     if (mEditorMode) {

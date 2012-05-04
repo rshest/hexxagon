@@ -11,9 +11,9 @@ public class Player {
         return mColor;
     }
 
-    public void startMove(Game game) {
+    public void startMove(HexxagonGame game) {
     }
 
-    public void onClickCell(int cellIdx, Game game) {
+    public void onClickCell(int cellIdx, HexxagonGame game) {
     }
 }

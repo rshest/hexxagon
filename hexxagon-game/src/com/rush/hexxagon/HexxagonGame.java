@@ -4,26 +4,26 @@ import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class Game {
+public class HexxagonGame {
     private static final int NUM_PLAYERS = 2;
 
     private int mSelectedCell = -1;
     private int mCurrentLevel = 0;
 
-    private GameBoard mBoard = new GameBoard();
-    private ArrayList<GameBoard> mLevels = new ArrayList<GameBoard>();
+    private HexxagonBoard mBoard = new HexxagonBoard();
+    private ArrayList<HexxagonBoard> mLevels = new ArrayList<HexxagonBoard>();
 
     private Player[] mPlayers = new Player[NUM_PLAYERS];
     private int mCurPlayer = -1;
 
     private Platform mPlatform;
     
-    public Game(Platform platform) {
+    public HexxagonGame(Platform platform) {
         mPlatform = platform;
     }
     
     public void loadLevelsData(InputStream stream) {
-        ArrayList<GameBoard> levels = new ArrayList<GameBoard>();
+        ArrayList<HexxagonBoard> levels = new ArrayList<HexxagonBoard>();
         try {
             if (stream == null) {
                 URL url = this.getClass().getResource("/resource/levels.txt");
@@ -36,14 +36,14 @@ public class Game {
                 if (line == null)
                     break;
                 if (line.contains("---")) {
-                    if (level.length() >= GameBoard.NUM_CELLS) {
-                        GameBoard board = new GameBoard();
+                    if (level.length() >= HexxagonBoard.NUM_CELLS) {
+                        HexxagonBoard board = new HexxagonBoard();
                         board.init(level);
                         levels.add(board);
                     }
                     level = "";
                 } else {
-                    level += String.format("%1$-" + GameBoard.WIDTH + "s", line); // pad with spaces
+                    level += String.format("%1$-" + HexxagonBoard.WIDTH + "s", line); // pad with spaces
                 }
             }
         } catch (IOException iox) {
@@ -53,33 +53,33 @@ public class Game {
     }
     
     public void startGame() {
-        mPlayers[0] = new HumanPlayer(GameBoard.CELL_WHITE);
-        mPlayers[0] = new AIPlayer(GameBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 3);
-        mPlayers[1] = new AIPlayer(GameBoard.CELL_BLACK, AIPlayer.SolverType.AlphaBetaSort, 3);
-        mBoard = new GameBoard(mLevels.get(mCurrentLevel));
+        mPlayers[0] = new HumanPlayer(HexxagonBoard.CELL_WHITE);
+        mPlayers[0] = new AIPlayer(HexxagonBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 3);
+        mPlayers[1] = new AIPlayer(HexxagonBoard.CELL_BLACK, AIPlayer.SolverType.AlphaBetaSort, 3);
+        mBoard = new HexxagonBoard(mLevels.get(mCurrentLevel));
         mCurPlayer = -1;
         nextMove();
     }
 
-    public void storeLevel(int levelIdx, GameBoard board) {
-        mLevels.set(levelIdx, new GameBoard(board));
+    public void storeLevel(int levelIdx, HexxagonBoard board) {
+        mLevels.set(levelIdx, new HexxagonBoard(board));
     }
 
     void nextMove() {
         mPlatform.repaint();
         mCurPlayer = (mCurPlayer + 1) % mPlayers.length;
         byte winner = mBoard.getWinner(getCurrentPlayer().getColor());
-        if (winner == GameBoard.CELL_EMPTY) {
+        if (winner == HexxagonBoard.CELL_EMPTY) {
             getCurrentPlayer().startMove(this);
         } else {
-            for (int i = 0; i < GameBoard.NUM_CELLS; i++) {
-                if (mBoard.cell(i) == GameBoard.CELL_EMPTY) {
+            for (int i = 0; i < HexxagonBoard.NUM_CELLS; i++) {
+                if (mBoard.cell(i) == HexxagonBoard.CELL_EMPTY) {
                     mBoard.setCell(i, winner);
                 }
             }
             mPlatform.repaint();
 
-            String message = (winner == GameBoard.CELL_BLACK) ? "Black won!" : "White won!";
+            String message = (winner == HexxagonBoard.CELL_BLACK) ? "Black won!" : "White won!";
             mPlatform.popup(message, new Platform.Callback(){
                 @Override
                 public void call() {
@@ -103,7 +103,7 @@ public class Game {
         mPlatform.repaint();
     }
 
-    public GameBoard getBoard() {
+    public HexxagonBoard getBoard() {
         return mBoard;
     }
 
@@ -123,14 +123,14 @@ public class Game {
         final String sep = "----------------\n";
         try {
             stream.write(sep.getBytes());
-            for (GameBoard b: mLevels) {
-                for (int j = 0; j < GameBoard.HEIGHT; j++) {
-                    for (int i = 0; i < GameBoard.WIDTH; i++) {
+            for (HexxagonBoard b: mLevels) {
+                for (int j = 0; j < HexxagonBoard.HEIGHT; j++) {
+                    for (int i = 0; i < HexxagonBoard.WIDTH; i++) {
                         byte c = ' ';
                         switch (b.cell(i, j)) {
-                            case GameBoard.CELL_EMPTY: c = '.'; break;
-                            case GameBoard.CELL_WHITE: c = 'O'; break;
-                            case GameBoard.CELL_BLACK: c = '*'; break;
+                            case HexxagonBoard.CELL_EMPTY: c = '.'; break;
+                            case HexxagonBoard.CELL_WHITE: c = 'O'; break;
+                            case HexxagonBoard.CELL_BLACK: c = '*'; break;
                         }
                         stream.write(c);
                     }
