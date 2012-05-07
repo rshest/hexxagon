@@ -303,16 +303,24 @@ public class HexxagonActivity extends Activity implements Platform
             if (ext == null) {
                 ext = mGame.getBoard().getBoardExtents();
             }
-            int cellsW = ext.right - ext.left + 1;
-            int cellsH = ext.bottom - ext.top + 1;
+            mMetrics = new HexGridCell(100);
+            HexGridCell.Extents cellExt = mMetrics.getAreaExtents(ext.left, ext.top, ext.right, ext.bottom);
 
             int viewW = mView.getWidth();
             int viewH = mView.getHeight();
 
-            mCellRadius = (int) Math.min((viewW/(cellsW + 0.25))*2.0f/3.0f, (viewH/(cellsH + 0.5))/Math.sqrt(3.0f));
+            if (viewH == 0 || cellExt.h == 0) {
+                return;
+            }
 
-            mBoardX = (int)((viewW - (cellsW + 0.25)*mCellRadius*3.0f/2.0f)/2.0f - ext.left*mCellRadius*3.0f/2.0f);
-            mBoardY = (int)((viewH - (cellsH + 0.5)*mCellRadius*Math.sqrt(3.0f))/2.0f - ext.top*mCellRadius*Math.sqrt(3.0f));
+            float areaRatio = (float)cellExt.w / (float)cellExt.h;
+            float viewRatio = (float)viewW / (float)viewH;
+
+            float ratio = (viewRatio > areaRatio) ? (float)viewH/(float)cellExt.h : (float)viewW/(float)cellExt.w;
+
+            mCellRadius = (int) (100*ratio);
+            mBoardX = (int) (mView.getLeft() -(int) (cellExt.x*ratio) + Math.max(0, (viewW - cellExt.w*ratio)/2));
+            mBoardY = (int) (mView.getTop() -(int) (cellExt.y*ratio) + Math.max(0, (viewH - cellExt.h*ratio)/2));
 
             mMetrics = new HexGridCell(mCellRadius);
 

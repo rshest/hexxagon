@@ -45,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_alignParentTop="true"
+                android:visibility="gone"
                 >
             <Button
                     android:id="@+id/zoom_in_button"

@@ -54,7 +54,7 @@ public class HexxagonGame {
     
     public void startGame() {
         mPlayers[0] = new HumanPlayer(HexxagonBoard.CELL_WHITE);
-        mPlayers[0] = new AIPlayer(HexxagonBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 3);
+        //mPlayers[0] = new AIPlayer(HexxagonBoard.CELL_WHITE, AIPlayer.SolverType.MinMax, 3);
         mPlayers[1] = new AIPlayer(HexxagonBoard.CELL_BLACK, AIPlayer.SolverType.AlphaBetaSort, 3);
         mBoard = new HexxagonBoard(mLevels.get(mCurrentLevel));
         mCurPlayer = -1;
